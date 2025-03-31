@@ -1,5 +1,9 @@
 # Merchant SDK for Go
 
+Official Golang SDK for Longswipe merchant integrations.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A Go SDK for interacting with the Longwipe Merchant Platform API. This library simplifies API integration by providing an easy-to-use, idiomatic interface for managing merchants, vouchers, and payments.
 
 ---
