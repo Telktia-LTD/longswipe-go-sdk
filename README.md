@@ -52,7 +52,7 @@ The SDK supports the following features:
 To install the SDK, use `go get`:
 
 ```bash
-go get github.com/yourusername/merchant-sdk
+go get github.com/Telktia-LTD/longswipe-go-sdk
 ```
 
 ---
@@ -76,9 +76,9 @@ import (
 func main() {
 	client := longswipe.NewClient(longswipe.ClientConfig{
 		BaseURL:    longswipe.PRODUCTION, // longswipe.SANDBOX
-		PublicKey:  "pk_live_odmenqa8RfE1H1E2O1C_VH8Bq9pEaxnYWLme7Rpi48E=",
+		PublicKey:  "YOUR_PUBLIC_API_KEY",
 		Timeout:    5 * time.Second,
-		PrivateKey: "sk_live_DRKlfAZwSiLYP6Vkqzomhj6HsBgaEfzzzOFZ1Jrx-Xo=",
+		PrivateKey: "YOUR_SECRET_API_KEY",
 	})
 
 	status, err := client.HealthCheck()
@@ -123,9 +123,9 @@ package main
 func main() {
 	client := longswipe.NewClient(longswipe.ClientConfig{
 		BaseURL:    longswipe.PRODUCTION,
-		PublicKey:  "pk_live_odmenqa8RfE1H1E2O1C_VH8Bq9pEaxnYWLme7Rpi48E=",
+		PublicKey:  "YOUR_PUBLIC_API_KEY",
 		Timeout:    5 * time.Second,
-		PrivateKey: "sk_live_DRKlfAZwSiLYP6Vkqzomhj6HsBgaEfzzzOFZ1Jrx-Xo=",
+		PrivateKey: "YOUR_SECRET_API_KEY",
 	})
 
 	// VERIFY VOUCHER
