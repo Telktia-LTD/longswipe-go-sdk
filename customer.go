@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+
+	"github.com/Telktia-LTD/longswipe-go-sdk/utils"
 )
 
-func (c *Client) GetCustomers(body *Pagination) (*CustomersResponse, error) {
+func (c *Client) GetCustomers(body *utils.Pagination) (*utils.CustomersResponse, error) {
 	endpoint := buildCustomerEndpoint(body.Page, body.Limit, body.Search)
-	var customers CustomersResponse
+	var customers utils.CustomersResponse
 
 	err := c.doRequestAndUnmarshal(
-		GET,
+		utils.GET,
 		endpoint,
 		nil,
 		&customers,
@@ -32,14 +34,14 @@ func buildCustomerEndpoint(page int, limit int, search string) string {
 	return "/merchant-integrations-server/fetch-customers?" + params.Encode()
 }
 
-func (c *Client) GetCustomer(email string) (*CustomerResponse, error) {
+func (c *Client) GetCustomer(email string) (*utils.CustomerResponse, error) {
 	endpoint := fmt.Sprintf("/merchant-integrations-server/fetch-customer-by-email/%s", email)
 	fmt.Println(endpoint)
 
-	var customer CustomerResponse
+	var customer utils.CustomerResponse
 
 	err := c.doRequestAndUnmarshal(
-		GET,
+		utils.GET,
 		endpoint,
 		nil,
 		&customer,
@@ -51,12 +53,12 @@ func (c *Client) GetCustomer(email string) (*CustomerResponse, error) {
 	return &customer, nil
 }
 
-func (c *Client) AddCustomer(body *AddNewCustomer) (*SuccessResponse, error) {
+func (c *Client) AddCustomer(body *utils.AddNewCustomer) (*utils.SuccessResponse, error) {
 	endpoint := "/merchant-integrations-server/add-new-customer"
-	var res SuccessResponse
+	var res utils.SuccessResponse
 
 	err := c.doRequestAndUnmarshal(
-		POST,
+		utils.POST,
 		endpoint,
 		body,
 		&res,
@@ -68,12 +70,12 @@ func (c *Client) AddCustomer(body *AddNewCustomer) (*SuccessResponse, error) {
 	return &res, nil
 }
 
-func (c *Client) UpdateCustomer(body *UpdatCustomer) (*SuccessResponse, error) {
+func (c *Client) UpdateCustomer(body *utils.UpdatCustomer) (*utils.SuccessResponse, error) {
 	endpoint := "/merchant-integrations-server/update-customer"
-	var res SuccessResponse
+	var res utils.SuccessResponse
 
 	err := c.doRequestAndUnmarshal(
-		PATCH,
+		utils.PATCH,
 		endpoint,
 		body,
 		&res,
@@ -85,12 +87,12 @@ func (c *Client) UpdateCustomer(body *UpdatCustomer) (*SuccessResponse, error) {
 	return &res, nil
 }
 
-func (c *Client) DeleteCustomer(customerID string) (*SuccessResponse, error) {
+func (c *Client) DeleteCustomer(customerID string) (*utils.SuccessResponse, error) {
 	endpoint := fmt.Sprintf("/merchant-integrations-server/delete-customer/%s", customerID)
-	var res SuccessResponse
+	var res utils.SuccessResponse
 
 	err := c.doRequestAndUnmarshal(
-		DELETE,
+		utils.DELETE,
 		endpoint,
 		nil,
 		&res,

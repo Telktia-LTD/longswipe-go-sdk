@@ -1,4 +1,4 @@
-package longswipe
+package utils
 
 import (
 	"time"

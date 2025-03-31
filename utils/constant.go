@@ -1,4 +1,4 @@
-package longswipe
+package utils
 
 const (
 	PRODUCTION = "https://api.longswipe.com"

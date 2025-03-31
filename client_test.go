@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Telktia-LTD/longswipe-go-sdk/utils"
 	"github.com/gofrs/uuid"
 )
 
@@ -256,7 +257,7 @@ func TestClient(t *testing.T) {
 			}`))
 		case "/merchant-integrations/redeem-voucher":
 			// Verify request body
-			var req RedeemRequest
+			var req utils.RedeemRequest
 			err := json.NewDecoder(r.Body).Decode(&req)
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
@@ -305,7 +306,7 @@ func TestClient(t *testing.T) {
 				}
 			}`))
 		case "/merchant-integrations-server/generate-voucher-for-customer":
-			var req GenerateVoucherForCustomerRequest
+			var req utils.GenerateVoucherForCustomerRequest
 			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte(`{"status":"error","code":400,"message":"Invalid request"}`))
@@ -414,7 +415,7 @@ func TestClient(t *testing.T) {
 
 	// Customer tests
 	t.Run("GetCustomers", func(t *testing.T) {
-		res, err := client.GetCustomers(&Pagination{Page: 1, Limit: 20, Search: ""})
+		res, err := client.GetCustomers(&utils.Pagination{Page: 1, Limit: 20, Search: ""})
 		if err != nil {
 			t.Fatalf("GetCustomers failed: %v", err)
 		}
@@ -444,7 +445,7 @@ func TestClient(t *testing.T) {
 	})
 
 	t.Run("AddCustomer", func(t *testing.T) {
-		res, err := client.AddCustomer(&AddNewCustomer{
+		res, err := client.AddCustomer(&utils.AddNewCustomer{
 			Email: "newuser@example.com",
 			Name:  "New User",
 		})
@@ -459,7 +460,7 @@ func TestClient(t *testing.T) {
 	})
 
 	t.Run("UpdateCustomer", func(t *testing.T) {
-		res, err := client.UpdateCustomer(&UpdatCustomer{
+		res, err := client.UpdateCustomer(&utils.UpdatCustomer{
 			ID:    testUUID,
 			Email: "updated@example.com",
 			Name:  "Updated User",
@@ -497,7 +498,7 @@ func TestClient(t *testing.T) {
 
 	// Voucher tests
 	t.Run("VerifyVoucher", func(t *testing.T) {
-		res, err := client.VerifyVoucher(&VerifyVoucherCodeRequest{
+		res, err := client.VerifyVoucher(&utils.VerifyVoucherCodeRequest{
 			VoucherCode: "LS3130635050",
 		})
 
@@ -515,7 +516,7 @@ func TestClient(t *testing.T) {
 	})
 
 	t.Run("GetVoucherRedeemptionCharges", func(t *testing.T) {
-		res, err := client.GetVoucherRedeemptionCharges(&RedeemRequest{
+		res, err := client.GetVoucherRedeemptionCharges(&utils.RedeemRequest{
 			VoucherCode:            "LS3130635050",
 			Amount:                 100.50,
 			ToCurrencyAbbreviation: "USD",
@@ -552,7 +553,7 @@ func TestClient(t *testing.T) {
 			Timeout:    1 * time.Microsecond,
 		})
 
-		_, err := badClient.GetCustomers(&Pagination{Page: 1, Limit: 10})
+		_, err := badClient.GetCustomers(&utils.Pagination{Page: 1, Limit: 10})
 		if err == nil {
 			t.Error("Expected error for GetCustomers with invalid client, got nil")
 		}
@@ -570,7 +571,7 @@ func TestClient(t *testing.T) {
 
 	t.Run("RedeemVoucher", func(t *testing.T) {
 		t.Run("SuccessfulRedemption", func(t *testing.T) {
-			req := &RedeemRequest{
+			req := &utils.RedeemRequest{
 				VoucherCode:            "VALID123",
 				Amount:                 100.50,
 				ToCurrencyAbbreviation: "USD",
@@ -588,7 +589,7 @@ func TestClient(t *testing.T) {
 		})
 
 		t.Run("InvalidVoucherCode", func(t *testing.T) {
-			req := &RedeemRequest{
+			req := &utils.RedeemRequest{
 				VoucherCode:            "INVALID_CODE",
 				Amount:                 100.50,
 				ToCurrencyAbbreviation: "USD",
@@ -601,7 +602,7 @@ func TestClient(t *testing.T) {
 		})
 
 		t.Run("InvalidAmount", func(t *testing.T) {
-			req := &RedeemRequest{
+			req := &utils.RedeemRequest{
 				VoucherCode:            "VALID123",
 				Amount:                 0,
 				ToCurrencyAbbreviation: "USD",
@@ -620,7 +621,7 @@ func TestClient(t *testing.T) {
 		networkID, _ := uuid.FromString(networkUUID)
 
 		t.Run("Success", func(t *testing.T) {
-			req := &GenerateVoucherForCustomerRequest{
+			req := &utils.GenerateVoucherForCustomerRequest{
 				CurrencyId:          currencyID,
 				AmountToPurchase:    100.50,
 				CustomerID:          customerID,
@@ -645,7 +646,7 @@ func TestClient(t *testing.T) {
 		})
 
 		t.Run("InvalidCurrency", func(t *testing.T) {
-			req := &GenerateVoucherForCustomerRequest{
+			req := &utils.GenerateVoucherForCustomerRequest{
 				CurrencyId:       uuid.Nil, // Invalid
 				AmountToPurchase: 100.50,
 				CustomerID:       customerID,
@@ -661,7 +662,7 @@ func TestClient(t *testing.T) {
 		})
 
 		t.Run("ZeroAmount", func(t *testing.T) {
-			req := &GenerateVoucherForCustomerRequest{
+			req := &utils.GenerateVoucherForCustomerRequest{
 				CurrencyId:       currencyID,
 				AmountToPurchase: 0, // Invalid
 				CustomerID:       customerID,

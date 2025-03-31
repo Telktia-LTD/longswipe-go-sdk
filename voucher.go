@@ -1,10 +1,12 @@
 package longswipe
 
-func (c *Client) GetVoucherRedeemptionCharges(body *RedeemRequest) (*RedeemeVoucherDetailsResponse, error) {
+import "github.com/Telktia-LTD/longswipe-go-sdk/utils"
+
+func (c *Client) GetVoucherRedeemptionCharges(body *utils.RedeemRequest) (*utils.RedeemeVoucherDetailsResponse, error) {
 	endpoint := "/merchant-integrations/fetch-voucher-redemption-charges"
-	var charges RedeemeVoucherDetailsResponse
+	var charges utils.RedeemeVoucherDetailsResponse
 	err := c.doRequestAndUnmarshal(
-		POST,
+		utils.POST,
 		endpoint,
 		body,
 		&charges,
@@ -16,12 +18,12 @@ func (c *Client) GetVoucherRedeemptionCharges(body *RedeemRequest) (*RedeemeVouc
 	return &charges, nil
 }
 
-func (c *Client) VerifyVoucher(body *VerifyVoucherCodeRequest) (*VerifyVoucherResponse, error) {
-	var verifyVoucher VerifyVoucherResponse
+func (c *Client) VerifyVoucher(body *utils.VerifyVoucherCodeRequest) (*utils.VerifyVoucherResponse, error) {
+	var verifyVoucher utils.VerifyVoucherResponse
 
 	endpoint := "/merchant-integrations/verify-voucher"
 	err := c.doRequestAndUnmarshal(
-		POST,
+		utils.POST,
 		endpoint,
 		body,
 		&verifyVoucher,
@@ -33,12 +35,12 @@ func (c *Client) VerifyVoucher(body *VerifyVoucherCodeRequest) (*VerifyVoucherRe
 	return &verifyVoucher, nil
 }
 
-func (c *Client) RedeemVoucher(body *RedeemRequest) (*SuccessResponse, error) {
+func (c *Client) RedeemVoucher(body *utils.RedeemRequest) (*utils.SuccessResponse, error) {
 	endpoint := "/merchant-integrations/redeem-voucher"
-	var redeemVoucher SuccessResponse
+	var redeemVoucher utils.SuccessResponse
 
 	err := c.doRequestAndUnmarshal(
-		POST,
+		utils.POST,
 		endpoint,
 		body,
 		&redeemVoucher,
@@ -50,12 +52,12 @@ func (c *Client) RedeemVoucher(body *RedeemRequest) (*SuccessResponse, error) {
 	return &redeemVoucher, nil
 }
 
-func (c *Client) GenerateVoucher(body *GenerateVoucherForCustomerRequest) (*SuccessResponse, error) {
+func (c *Client) GenerateVoucher(body *utils.GenerateVoucherForCustomerRequest) (*utils.SuccessResponse, error) {
 	endpoint := "/merchant-integrations-server/generate-voucher-for-customer"
-	var res SuccessResponse
+	var res utils.SuccessResponse
 
 	err := c.doRequestAndUnmarshal(
-		POST,
+		utils.POST,
 		endpoint,
 		body,
 		&res,
