@@ -69,13 +69,14 @@ package main
 import (
 	"fmt"
 	"log"
-	"longswipe-go-sdk"
+	"github.com/Telktia-LTD/longswipe-go-sdk"
+	"github.com/Telktia-LTD/longswipe-go-sdk/utils"
 	"time"
 )
 
 func main() {
 	client := longswipe.NewClient(longswipe.ClientConfig{
-		BaseURL:    longswipe.PRODUCTION, // longswipe.SANDBOX
+		BaseURL:    utils.PRODUCTION, // utils.SANDBOX
 		PublicKey:  "YOUR_PUBLIC_API_KEY",
 		Timeout:    5 * time.Second,
 		PrivateKey: "YOUR_SECRET_API_KEY",
@@ -122,21 +123,21 @@ package main
 
 func main() {
 	client := longswipe.NewClient(longswipe.ClientConfig{
-		BaseURL:    longswipe.PRODUCTION,
+		BaseURL:    utils.PRODUCTION,
 		PublicKey:  "YOUR_PUBLIC_API_KEY",
 		Timeout:    5 * time.Second,
 		PrivateKey: "YOUR_SECRET_API_KEY",
 	})
 
 	// VERIFY VOUCHER
-	res, err := client.VerifyVoucher(&longswipe.VerifyVoucherCodeRequest{VoucherCode: "LS3130635050"})
+	res, err := client.VerifyVoucher(&utils.VerifyVoucherCodeRequest{VoucherCode: "LS3130635050"})
 	if err != nil {
 		log.Fatalf("verify voucher failed: %v", err)
 	}
 	fmt.Println("Service status:", res.Data.Balance)
 
 	// FETCH VOUCHER CHARGES
-	res, err := client.GetVoucherRedeemptionCharges(&longswipe.RedeemRequest{
+	res, err := client.GetVoucherRedeemptionCharges(&utils.RedeemRequest{
 		VoucherCode:            "LS3130635050",
 		Amount:                 200,
 		LockPin:                "",
@@ -149,7 +150,7 @@ func main() {
 	fmt.Println("Service status:", res.Data.Charges.TotalDeductable)
 
 	// REDEEM VOUCHER CHARGES
-	res, err := client.RedeemVoucher(&longswipe.RedeemRequest{
+	res, err := client.RedeemVoucher(&utils.RedeemRequest{
 		VoucherCode:            "LS3130635050",
 		Amount:                 100,
 		LockPin:                "",
