@@ -6,13 +6,12 @@ import (
 	"time"
 
 	"github.com/Telktia-LTD/longswipe-go-sdk"
-	"github.com/Telktia-LTD/longswipe-go-sdk/utils"
 	"github.com/gofrs/uuid"
 )
 
 func main() {
 	client := longswipe.NewClient(longswipe.ClientConfig{
-		BaseURL:    utils.SANDBOX,
+		BaseURL:    longswipe.SANDBOX,
 		PublicKey:  "pk_live_odmenqa8RfE1H1E2O1C_VH8Bq9pEaxnYWLme7Rpi48E=",
 		Timeout:    30 * time.Second,
 		PrivateKey: "sk_live_DRKlfAZwSiLYP6Vkqzomhj6HsBgaEfzzzOFZ1Jrx-Xo=",
@@ -28,7 +27,7 @@ func main() {
 		log.Fatalf("invalid customer ID: %v", err)
 	}
 
-	res, err := client.GenerateVoucher(&utils.GenerateVoucherForCustomerRequest{
+	res, err := client.GenerateVoucher(&longswipe.GenerateVoucherForCustomerRequest{
 		CurrencyId:       currencyID,
 		AmountToPurchase: 150.00,
 		CustomerID:       customerID,

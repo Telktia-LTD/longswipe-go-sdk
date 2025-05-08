@@ -1,4 +1,4 @@
-package utils
+package longswipe
 
 import (
 	"time"
@@ -8,6 +8,12 @@ import (
 
 type UserRoles string
 type NetworkType string
+type MERCHANTROLES string
+
+var (
+	user  MERCHANTROLES = "USER"
+	admin MERCHANTROLES = "ADMIN"
+)
 
 type SuccessResponse struct {
 	Status  string `json:"status"`
@@ -321,4 +327,26 @@ type FetchAllAllowedInvoiceCurrencyResponse struct {
 	Code    int                      `json:"code"`
 	Status  string                   `json:"status"`
 	Data    []AllowedInvoiceCurrency `json:"data" validate:"omitempty,uuid"`
+}
+
+type AddNewUserRequest struct {
+	Name  string        `json:"name" validate:"required"`
+	Email string        `json:"email" validate:"email,required"`
+	Role  MERCHANTROLES `json:"role" validate:"required"`
+}
+
+type MerchantUserData struct {
+	ID         uuid.UUID     `json:"id"`
+	MerchantID uuid.UUID     `json:"merchantID"`
+	Name       string        `json:"name"`
+	Email      string        `json:"email"`
+	Team       string        `json:"team"`
+	Role       MERCHANTROLES `json:"role"`
+}
+
+type MerchantUserResponse struct {
+	Message string             `json:"message"`
+	Code    int                `json:"code"`
+	Status  string             `json:"status"`
+	Data    []MerchantUserData `json:"data"`
 }

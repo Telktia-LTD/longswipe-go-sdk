@@ -4,17 +4,14 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
-
-	"github.com/Telktia-LTD/longswipe-go-sdk/utils"
 )
 
-func (c *Client) FetchInvoice(body *utils.Pagination) (*utils.MerchantInvoiceResponse, error) {
+func (c *Client) FetchInvoice(body *Pagination) (*MerchantInvoiceResponse, error) {
 	endpoint := buildInvoiceEndpoint(body.Page, body.Limit, body.Search)
-	fmt.Println("======1", endpoint)
-	var invoice utils.MerchantInvoiceResponse
+	var invoice MerchantInvoiceResponse
 
 	err := c.doRequestAndUnmarshal(
-		utils.GET,
+		GET,
 		endpoint,
 		nil,
 		&invoice,
@@ -35,14 +32,13 @@ func buildInvoiceEndpoint(page int, limit int, filter string) string {
 	return "/merchant-integrations-server/fetch-invoice?" + params.Encode()
 }
 
-func (c *Client) GetAllInvoiceCurrency() (*utils.FetchAllAllowedInvoiceCurrencyResponse, error) {
+func (c *Client) GetAllInvoiceCurrency() (*FetchAllAllowedInvoiceCurrencyResponse, error) {
 	endpoint := fmt.Sprintf("/merchant-integrations-server/fetch-all-allowed-invoice-Currency")
-	fmt.Println("======2", endpoint)
 
-	var allowedCurrency utils.FetchAllAllowedInvoiceCurrencyResponse
+	var allowedCurrency FetchAllAllowedInvoiceCurrencyResponse
 
 	err := c.doRequestAndUnmarshal(
-		utils.GET,
+		GET,
 		endpoint,
 		nil,
 		&allowedCurrency,
@@ -54,12 +50,12 @@ func (c *Client) GetAllInvoiceCurrency() (*utils.FetchAllAllowedInvoiceCurrencyR
 	return &allowedCurrency, nil
 }
 
-func (c *Client) CreateInvoice(body *utils.CreateInvoiceRequest) (*utils.SuccessResponse, error) {
+func (c *Client) CreateInvoice(body *CreateInvoiceRequest) (*SuccessResponse, error) {
 	endpoint := "/merchant-integrations-server/create-invoice"
-	var res utils.SuccessResponse
+	var res SuccessResponse
 
 	err := c.doRequestAndUnmarshal(
-		utils.POST,
+		POST,
 		endpoint,
 		body,
 		&res,
@@ -71,12 +67,12 @@ func (c *Client) CreateInvoice(body *utils.CreateInvoiceRequest) (*utils.Success
 	return &res, nil
 }
 
-func (c *Client) ApproveInvoice(body *utils.ApproveInvoiceRequest) (*utils.SuccessResponse, error) {
+func (c *Client) ApproveInvoice(body *ApproveInvoiceRequest) (*SuccessResponse, error) {
 	endpoint := "/merchant-integrations-server/approve-invoice"
-	var res utils.SuccessResponse
+	var res SuccessResponse
 
 	err := c.doRequestAndUnmarshal(
-		utils.POST,
+		POST,
 		endpoint,
 		body,
 		&res,

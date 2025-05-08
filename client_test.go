@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Telktia-LTD/longswipe-go-sdk/utils"
 	"github.com/gofrs/uuid"
 )
 
@@ -19,28 +18,28 @@ type TestData struct {
 	RedeemedUUID   uuid.UUID
 	NetworkUUID    uuid.UUID
 	CreatedAt      time.Time
-	Customer       utils.CustomerData
-	Voucher        utils.VoucherResponse
-	Charges        utils.V2PayoutDetailsResponse
-	Currencies     []utils.Currencies
-	Networks       []utils.CryptoNetworkDetails
-	SuccessResp    utils.SuccessResponse
-	CustomerResp   utils.CustomerResponse
-	CustomerList   utils.CustomersResponse
-	VoucherResp    utils.VerifyVoucherResponse
-	RedemptionResp utils.ApiResponse[struct {
-		ID              uuid.UUID             `json:"id"`
-		VoucherId       uuid.UUID             `json:"voucherId"`
-		Amount          float64               `json:"amount"`
-		Currency        utils.CurrencyDetails `json:"currency"`
-		TransactionHash string                `json:"transactionHash"`
-		Timestamp       time.Time             `json:"timestamp"`
+	Customer       CustomerData
+	Voucher        VoucherResponse
+	Charges        V2PayoutDetailsResponse
+	Currencies     []Currencies
+	Networks       []CryptoNetworkDetails
+	SuccessResp    SuccessResponse
+	CustomerResp   CustomerResponse
+	CustomerList   CustomersResponse
+	VoucherResp    VerifyVoucherResponse
+	RedemptionResp ApiResponse[struct {
+		ID              uuid.UUID       `json:"id"`
+		VoucherId       uuid.UUID       `json:"voucherId"`
+		Amount          float64         `json:"amount"`
+		Currency        CurrencyDetails `json:"currency"`
+		TransactionHash string          `json:"transactionHash"`
+		Timestamp       time.Time       `json:"timestamp"`
 	}]
-	ChargesResp         utils.RedeemeVoucherDetailsResponse
-	NetworkResp         utils.CryptoNetworkResponse
-	CurrencyResp        utils.FetchCurrenciesResponse
-	InvoiceResp         utils.MerchantInvoiceResponse
-	InvoiceCurrencyResp utils.FetchAllAllowedInvoiceCurrencyResponse
+	ChargesResp         RedeemeVoucherDetailsResponse
+	NetworkResp         CryptoNetworkResponse
+	CurrencyResp        FetchCurrenciesResponse
+	InvoiceResp         MerchantInvoiceResponse
+	InvoiceCurrencyResp FetchAllAllowedInvoiceCurrencyResponse
 }
 
 func setupTestData() TestData {
@@ -51,18 +50,18 @@ func setupTestData() TestData {
 	redeemedUUID := uuid.Must(uuid.FromString("e733b2ec-b829-4283-bf24-276014307896"))
 	networkUUID := uuid.Must(uuid.FromString("b733b2ec-b829-4283-bf24-276014307896"))
 
-	customer := utils.CustomerData{
+	customer := CustomerData{
 		ID:    testUUID,
 		Email: "test@example.com",
 		Name:  "Test User",
 	}
 
-	voucher := utils.VoucherResponse{
+	voucher := VoucherResponse{
 		ID:      testUUID,
 		Amount:  100.50,
 		Balance: 100.50,
 		Code:    "LS3130635050",
-		GeneratedCurrency: utils.CurrencyDetails{
+		GeneratedCurrency: CurrencyDetails{
 			ID:           currencyUUID,
 			Image:        "https://example.com/usd.jpg",
 			Name:         "US Dollar",
@@ -76,7 +75,7 @@ func setupTestData() TestData {
 		CreatedAt:  now,
 	}
 
-	charges := utils.V2PayoutDetailsResponse{
+	charges := V2PayoutDetailsResponse{
 		ToAmount:                               95.25,
 		ProcessingFee:                          2.50,
 		TotalGasAndProceesingFeeInFromCurrency: 5.25,
@@ -84,13 +83,13 @@ func setupTestData() TestData {
 		ExchangeRate:                           1.05,
 		PercentageCharge:                       0.025,
 		IsPercentageCharge:                     true,
-		ToCurrency: utils.CurrencyDetails{
+		ToCurrency: CurrencyDetails{
 			ID:           currencyUUID,
 			Name:         "US Dollar",
 			Symbol:       "$",
 			Abbreviation: "USD",
 		},
-		FromCurrency: utils.CurrencyDetails{
+		FromCurrency: CurrencyDetails{
 			ID:           testUUID,
 			Name:         "Euro",
 			Symbol:       "€",
@@ -99,7 +98,7 @@ func setupTestData() TestData {
 		TotalDeductable: 5.25,
 	}
 
-	currencies := []utils.Currencies{
+	currencies := []Currencies{
 		{
 			ID:           testUUID,
 			Image:        "https://example.com/btc.png",
@@ -122,13 +121,13 @@ func setupTestData() TestData {
 		},
 	}
 
-	networks := []utils.CryptoNetworkDetails{
+	networks := []CryptoNetworkDetails{
 		{
 			ID:          testUUID,
 			NetworkName: "Ethereum Mainnet",
-			CryptoCurrencies: []utils.CryptoCurrency{
+			CryptoCurrencies: []CryptoCurrency{
 				{
-					CurrencyData: utils.CurrencyDetails{
+					CurrencyData: CurrencyDetails{
 						ID:     currencyUUID,
 						Symbol: "ETH",
 					},
@@ -137,13 +136,13 @@ func setupTestData() TestData {
 		},
 	}
 
-	invoiceCurrency := utils.FetchAllAllowedInvoiceCurrencyResponse{
+	invoiceCurrency := FetchAllAllowedInvoiceCurrencyResponse{
 		Status:  "success",
 		Message: "Invoice currencies retrieved",
 		Code:    200,
-		Data: []utils.AllowedInvoiceCurrency{
+		Data: []AllowedInvoiceCurrency{
 			{
-				Currency: utils.CurrencyDetails{
+				Currency: CurrencyDetails{
 					ID:           currencyUUID,
 					Name:         "US Dollar",
 					Symbol:       "$",
@@ -154,27 +153,27 @@ func setupTestData() TestData {
 		},
 	}
 
-	invoiceResp := utils.MerchantInvoiceResponse{
+	invoiceResp := MerchantInvoiceResponse{
 		Status:  "success",
 		Message: "Invoices retrieved",
 		Code:    200,
 		Data: struct {
-			Invoices []utils.Invoice `json:"invoices"`
-			Total    int             `json:"total"`
+			Invoices []Invoice `json:"invoices"`
+			Total    int       `json:"total"`
 		}{
 			Total: 1,
-			Invoices: []utils.Invoice{
+			Invoices: []Invoice{
 				{
 					ID:                testUUID,
 					InvoiceNumber:     "INV-001",
-					MerchantUser:      utils.MerchantUserDatas{},
+					MerchantUser:      MerchantUserDatas{},
 					UserId:            &customerUUID,
 					InvoiceDate:       now,
 					DueDate:           now.AddDate(0, 0, 30),
 					TotalAmount:       1500.00,
 					Status:            "pending",
-					InvoiceItems:      []utils.InvoiceItem{},
-					Currency:          utils.CurrencyDetails{},
+					InvoiceItems:      []InvoiceItem{},
+					Currency:          CurrencyDetails{},
 					BlockchainNetwork: nil,
 					CreatedAt:         now,
 					UpdatedAt:         now,
@@ -195,52 +194,52 @@ func setupTestData() TestData {
 		Charges:      charges,
 		Currencies:   currencies,
 		Networks:     networks,
-		SuccessResp: utils.SuccessResponse{
+		SuccessResp: SuccessResponse{
 			Status:  "success",
 			Message: "Operation completed",
 			Code:    200,
 		},
-		CustomerResp: utils.CustomerResponse{
+		CustomerResp: CustomerResponse{
 			Message: "Customer retrieved",
 			Code:    200,
 			Status:  "success",
 			Data:    customer,
 		},
-		CustomerList: utils.CustomersResponse{
+		CustomerList: CustomersResponse{
 			Message: "Customers retrieved",
 			Code:    200,
 			Status:  "success",
-			Data: utils.CustomerDetails{
+			Data: CustomerDetails{
 				Total:     1,
 				Page:      1,
 				Limit:     10,
-				Customers: []utils.CustomerData{customer},
+				Customers: []CustomerData{customer},
 			},
 		},
-		VoucherResp: utils.VerifyVoucherResponse{
+		VoucherResp: VerifyVoucherResponse{
 			Status:  "success",
 			Message: "Voucher verified",
 			Code:    200,
 			Data:    voucher,
 		},
-		RedemptionResp: utils.ApiResponse[struct {
-			ID              uuid.UUID             `json:"id"`
-			VoucherId       uuid.UUID             `json:"voucherId"`
-			Amount          float64               `json:"amount"`
-			Currency        utils.CurrencyDetails `json:"currency"`
-			TransactionHash string                `json:"transactionHash"`
-			Timestamp       time.Time             `json:"timestamp"`
+		RedemptionResp: ApiResponse[struct {
+			ID              uuid.UUID       `json:"id"`
+			VoucherId       uuid.UUID       `json:"voucherId"`
+			Amount          float64         `json:"amount"`
+			Currency        CurrencyDetails `json:"currency"`
+			TransactionHash string          `json:"transactionHash"`
+			Timestamp       time.Time       `json:"timestamp"`
 		}]{
 			Status:  "success",
 			Message: "Voucher redeemed",
 			Code:    200,
 			Data: struct {
-				ID              uuid.UUID             `json:"id"`
-				VoucherId       uuid.UUID             `json:"voucherId"`
-				Amount          float64               `json:"amount"`
-				Currency        utils.CurrencyDetails `json:"currency"`
-				TransactionHash string                `json:"transactionHash"`
-				Timestamp       time.Time             `json:"timestamp"`
+				ID              uuid.UUID       `json:"id"`
+				VoucherId       uuid.UUID       `json:"voucherId"`
+				Amount          float64         `json:"amount"`
+				Currency        CurrencyDetails `json:"currency"`
+				TransactionHash string          `json:"transactionHash"`
+				Timestamp       time.Time       `json:"timestamp"`
 			}{
 				ID:              redeemedUUID,
 				VoucherId:       testUUID,
@@ -250,27 +249,27 @@ func setupTestData() TestData {
 				Timestamp:       now,
 			},
 		},
-		ChargesResp: utils.RedeemeVoucherDetailsResponse{
+		ChargesResp: RedeemeVoucherDetailsResponse{
 			Status:  "success",
 			Message: "Charges retrieved",
 			Code:    200,
-			Data: utils.RedeemVoucherDetailDataAll{
+			Data: RedeemVoucherDetailDataAll{
 				Charges: charges,
 				Voucher: voucher,
 			},
 		},
-		NetworkResp: utils.CryptoNetworkResponse{
+		NetworkResp: CryptoNetworkResponse{
 			Status:  "success",
 			Message: "Networks retrieved",
 			Code:    200,
 			Data:    networks,
 		},
-		CurrencyResp: utils.FetchCurrenciesResponse{
+		CurrencyResp: FetchCurrenciesResponse{
 			Message: "Currencies retrieved",
 			Code:    200,
 			Status:  "success",
 			Data: struct {
-				Currencies []utils.Currencies `json:"currencies"`
+				Currencies []Currencies `json:"currencies"`
 			}{
 				Currencies: currencies,
 			},
@@ -302,16 +301,16 @@ func setupTestServer(td TestData) *httptest.Server {
 			json.NewEncoder(w).Encode(td.ChargesResp)
 		case "/merchant-integrations-server/fetch-customer-by-email/nonexistent@example.com":
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(utils.ErrorResponse{
+			json.NewEncoder(w).Encode(ErrorResponse{
 				Status:  "error",
 				Message: "Customer not found",
 				Code:    404,
 			})
 		case "/merchant-integrations/redeem-voucher":
-			var req utils.RedeemRequest
+			var req RedeemRequest
 			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(utils.ErrorResponse{
+				json.NewEncoder(w).Encode(ErrorResponse{
 					Status:  "error",
 					Message: "Invalid request",
 					Code:    400,
@@ -321,7 +320,7 @@ func setupTestServer(td TestData) *httptest.Server {
 
 			if req.VoucherCode == "INVALID_CODE" {
 				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(utils.ErrorResponse{
+				json.NewEncoder(w).Encode(ErrorResponse{
 					Status:  "error",
 					Message: "Invalid voucher code",
 					Code:    400,
@@ -331,7 +330,7 @@ func setupTestServer(td TestData) *httptest.Server {
 
 			if req.Amount <= 0 {
 				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(utils.ErrorResponse{
+				json.NewEncoder(w).Encode(ErrorResponse{
 					Status:  "error",
 					Message: "Amount must be positive",
 					Code:    400,
@@ -341,10 +340,10 @@ func setupTestServer(td TestData) *httptest.Server {
 
 			json.NewEncoder(w).Encode(td.RedemptionResp)
 		case "/merchant-integrations-server/generate-voucher-for-customer":
-			var req utils.GenerateVoucherForCustomerRequest
+			var req GenerateVoucherForCustomerRequest
 			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(utils.ErrorResponse{
+				json.NewEncoder(w).Encode(ErrorResponse{
 					Status:  "error",
 					Message: "Invalid request",
 					Code:    400,
@@ -354,7 +353,7 @@ func setupTestServer(td TestData) *httptest.Server {
 
 			if req.CurrencyId == uuid.Nil {
 				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(utils.ErrorResponse{
+				json.NewEncoder(w).Encode(ErrorResponse{
 					Status:  "error",
 					Message: "Currency ID is required",
 					Code:    400,
@@ -364,7 +363,7 @@ func setupTestServer(td TestData) *httptest.Server {
 
 			if req.AmountToPurchase <= 0 {
 				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(utils.ErrorResponse{
+				json.NewEncoder(w).Encode(ErrorResponse{
 					Status:  "error",
 					Message: "Amount must be positive",
 					Code:    400,
@@ -387,7 +386,7 @@ func setupTestServer(td TestData) *httptest.Server {
 			json.NewEncoder(w).Encode(td.SuccessResp)
 		default:
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(utils.ErrorResponse{
+			json.NewEncoder(w).Encode(ErrorResponse{
 				Status:  "error",
 				Message: "Endpoint not found",
 				Code:    404,
@@ -410,7 +409,7 @@ func TestClient(t *testing.T) {
 
 	t.Run("CustomerOperations", func(t *testing.T) {
 		t.Run("GetCustomers", func(t *testing.T) {
-			res, err := client.GetCustomers(&utils.Pagination{Page: 1, Limit: 20})
+			res, err := client.GetCustomers(&Pagination{Page: 1, Limit: 20})
 			if err != nil {
 				t.Fatalf("GetCustomers failed: %v", err)
 			}
@@ -436,7 +435,7 @@ func TestClient(t *testing.T) {
 		})
 
 		t.Run("AddCustomer", func(t *testing.T) {
-			res, err := client.AddCustomer(&utils.AddNewCustomer{
+			res, err := client.AddCustomer(&AddNewCustomer{
 				Email: "new@example.com",
 				Name:  "New User",
 			})
@@ -450,7 +449,7 @@ func TestClient(t *testing.T) {
 		})
 
 		t.Run("UpdateCustomer", func(t *testing.T) {
-			res, err := client.UpdateCustomer(&utils.UpdatCustomer{
+			res, err := client.UpdateCustomer(&UpdatCustomer{
 				ID:    td.TestUUID.String(),
 				Email: "updated@example.com",
 				Name:  "Updated User",
@@ -478,7 +477,7 @@ func TestClient(t *testing.T) {
 
 	t.Run("VoucherOperations", func(t *testing.T) {
 		t.Run("VerifyVoucher", func(t *testing.T) {
-			_, err := client.VerifyVoucher(&utils.VerifyVoucherCodeRequest{
+			_, err := client.VerifyVoucher(&VerifyVoucherCodeRequest{
 				VoucherCode: td.Voucher.Code,
 			})
 			if err != nil {
@@ -491,7 +490,7 @@ func TestClient(t *testing.T) {
 		})
 
 		t.Run("GetVoucherRedemptionCharges", func(t *testing.T) {
-			res, err := client.GetVoucherRedeemptionCharges(&utils.RedeemRequest{
+			res, err := client.GetVoucherRedeemptionCharges(&RedeemRequest{
 				VoucherCode:            td.Voucher.Code,
 				Amount:                 100.50,
 				ToCurrencyAbbreviation: "USD",
@@ -508,7 +507,7 @@ func TestClient(t *testing.T) {
 
 		t.Run("RedeemVoucher", func(t *testing.T) {
 			t.Run("Success", func(t *testing.T) {
-				res, err := client.RedeemVoucher(&utils.RedeemRequest{
+				res, err := client.RedeemVoucher(&RedeemRequest{
 					VoucherCode:            td.Voucher.Code,
 					Amount:                 50.0,
 					ToCurrencyAbbreviation: "USD",
@@ -521,7 +520,7 @@ func TestClient(t *testing.T) {
 			})
 
 			t.Run("InvalidCode", func(t *testing.T) {
-				_, err := client.RedeemVoucher(&utils.RedeemRequest{
+				_, err := client.RedeemVoucher(&RedeemRequest{
 					VoucherCode:            "INVALID_CODE",
 					Amount:                 50.0,
 					ToCurrencyAbbreviation: "USD",
@@ -532,7 +531,7 @@ func TestClient(t *testing.T) {
 			})
 
 			t.Run("InvalidAmount", func(t *testing.T) {
-				_, err := client.RedeemVoucher(&utils.RedeemRequest{
+				_, err := client.RedeemVoucher(&RedeemRequest{
 					VoucherCode:            td.Voucher.Code,
 					Amount:                 0,
 					ToCurrencyAbbreviation: "USD",
@@ -545,7 +544,7 @@ func TestClient(t *testing.T) {
 
 		t.Run("GenerateVoucher", func(t *testing.T) {
 			t.Run("Success", func(t *testing.T) {
-				res, err := client.GenerateVoucher(&utils.GenerateVoucherForCustomerRequest{
+				res, err := client.GenerateVoucher(&GenerateVoucherForCustomerRequest{
 					CurrencyId:          td.CurrencyUUID,
 					AmountToPurchase:    100.0,
 					CustomerID:          td.CustomerUUID,
@@ -562,7 +561,7 @@ func TestClient(t *testing.T) {
 			})
 
 			t.Run("InvalidCurrency", func(t *testing.T) {
-				_, err := client.GenerateVoucher(&utils.GenerateVoucherForCustomerRequest{
+				_, err := client.GenerateVoucher(&GenerateVoucherForCustomerRequest{
 					CurrencyId:       uuid.Nil,
 					AmountToPurchase: 100.0,
 					CustomerID:       td.CustomerUUID,
@@ -573,7 +572,7 @@ func TestClient(t *testing.T) {
 			})
 
 			t.Run("ZeroAmount", func(t *testing.T) {
-				_, err := client.GenerateVoucher(&utils.GenerateVoucherForCustomerRequest{
+				_, err := client.GenerateVoucher(&GenerateVoucherForCustomerRequest{
 					CurrencyId:       td.CurrencyUUID,
 					AmountToPurchase: 0,
 					CustomerID:       td.CustomerUUID,
@@ -620,7 +619,7 @@ func TestClient(t *testing.T) {
 				Timeout:    1 * time.Microsecond,
 			})
 
-			_, err := badClient.GetCustomers(&utils.Pagination{Page: 1, Limit: 10})
+			_, err := badClient.GetCustomers(&Pagination{Page: 1, Limit: 10})
 			if err == nil {
 				t.Error("Expected error for invalid URL, got nil")
 			}
@@ -636,7 +635,7 @@ func TestClient(t *testing.T) {
 
 	t.Run("InvoiceOperations", func(t *testing.T) {
 		t.Run("FetchInvoice", func(t *testing.T) {
-			res, err := client.FetchInvoice(&utils.Pagination{
+			res, err := client.FetchInvoice(&Pagination{
 				Page:   1,
 				Limit:  10,
 				Search: "INV-",
@@ -662,12 +661,12 @@ func TestClient(t *testing.T) {
 		})
 
 		t.Run("CreateInvoice", func(t *testing.T) {
-			req := &utils.CreateInvoiceRequest{
+			req := &CreateInvoiceRequest{
 				MerchantUserId: td.TestUUID,
 				InvoiceDate:    time.Now(),
 				DueDate:        time.Now().AddDate(0, 0, 30),
 				CurrencyId:     td.CurrencyUUID,
-				InvoiceItems: []utils.InvoiceItemRequest{
+				InvoiceItems: []InvoiceItemRequest{
 					{
 						Description: "Test Item",
 						Quantity:    1,
@@ -687,7 +686,7 @@ func TestClient(t *testing.T) {
 		})
 
 		t.Run("ApproveInvoice", func(t *testing.T) {
-			req := &utils.ApproveInvoiceRequest{
+			req := &ApproveInvoiceRequest{
 				InvoiceID: td.TestUUID,
 				OnChain:   true,
 			}

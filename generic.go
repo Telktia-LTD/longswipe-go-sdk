@@ -1,13 +1,11 @@
 package longswipe
 
-import "github.com/Telktia-LTD/longswipe-go-sdk/utils"
-
-func (c *Client) GetAllNetwork() (*utils.CryptoNetworkResponse, error) {
+func (c *Client) GetAllNetwork() (*CryptoNetworkResponse, error) {
 	endpoint := "/merchant-integrations/fetch-supported-cryptonetworks"
-	var networks utils.CryptoNetworkResponse
+	var networks CryptoNetworkResponse
 
 	err := c.doRequestAndUnmarshal(
-		utils.GET,
+		GET,
 		endpoint,
 		nil,
 		&networks,
@@ -19,11 +17,11 @@ func (c *Client) GetAllNetwork() (*utils.CryptoNetworkResponse, error) {
 	return &networks, nil
 }
 
-func (c *Client) GetAllCurrency() (*utils.FetchCurrenciesResponse, error) {
+func (c *Client) GetAllCurrency() (*FetchCurrenciesResponse, error) {
 	endpoint := "/merchant-integrations/fetch-supported-currencies"
-	var currencies *utils.FetchCurrenciesResponse
+	var currencies FetchCurrenciesResponse
 	err := c.doRequestAndUnmarshal(
-		utils.GET,
+		GET,
 		endpoint,
 		nil,
 		&currencies,
@@ -32,5 +30,5 @@ func (c *Client) GetAllCurrency() (*utils.FetchCurrenciesResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	return currencies, nil
+	return &currencies, nil
 }
