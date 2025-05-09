@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+
+	"github.com/gofrs/uuid"
 )
 
 func (c *Client) GetCustomers(body *Pagination) (*CustomersResponse, error) {
@@ -85,7 +87,7 @@ func (c *Client) UpdateCustomer(body *UpdatCustomer) (*SuccessResponse, error) {
 	return &res, nil
 }
 
-func (c *Client) DeleteCustomer(customerID string) (*SuccessResponse, error) {
+func (c *Client) DeleteCustomer(customerID uuid.UUID) (*SuccessResponse, error) {
 	endpoint := fmt.Sprintf("/merchant-integrations-server/delete-customer/%s", customerID)
 	var res SuccessResponse
 

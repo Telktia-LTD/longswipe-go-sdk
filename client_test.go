@@ -148,7 +148,6 @@ func setupTestData() TestData {
 					Symbol:       "$",
 					Abbreviation: "USD",
 				},
-				IsEnabled: true,
 			},
 		},
 	}
@@ -166,7 +165,6 @@ func setupTestData() TestData {
 				{
 					ID:                testUUID,
 					InvoiceNumber:     "INV-001",
-					MerchantUser:      MerchantUserDatas{},
 					UserId:            &customerUUID,
 					InvoiceDate:       now,
 					DueDate:           now.AddDate(0, 0, 30),
@@ -450,7 +448,7 @@ func TestClient(t *testing.T) {
 
 		t.Run("UpdateCustomer", func(t *testing.T) {
 			res, err := client.UpdateCustomer(&UpdatCustomer{
-				ID:    td.TestUUID.String(),
+				ID:    td.TestUUID,
 				Email: "updated@example.com",
 				Name:  "Updated User",
 			})
@@ -464,7 +462,7 @@ func TestClient(t *testing.T) {
 		})
 
 		t.Run("DeleteCustomer", func(t *testing.T) {
-			res, err := client.DeleteCustomer(td.TestUUID.String())
+			res, err := client.DeleteCustomer(td.TestUUID)
 			if err != nil {
 				t.Fatalf("DeleteCustomer failed: %v", err)
 			}
@@ -544,7 +542,7 @@ func TestClient(t *testing.T) {
 
 		t.Run("GenerateVoucher", func(t *testing.T) {
 			t.Run("Success", func(t *testing.T) {
-				res, err := client.GenerateVoucher(&GenerateVoucherForCustomerRequest{
+				res, err := client.GenerateVoucherForCustomer(&GenerateVoucherForCustomerRequest{
 					CurrencyId:          td.CurrencyUUID,
 					AmountToPurchase:    100.0,
 					CustomerID:          td.CustomerUUID,
@@ -561,7 +559,7 @@ func TestClient(t *testing.T) {
 			})
 
 			t.Run("InvalidCurrency", func(t *testing.T) {
-				_, err := client.GenerateVoucher(&GenerateVoucherForCustomerRequest{
+				_, err := client.GenerateVoucherForCustomer(&GenerateVoucherForCustomerRequest{
 					CurrencyId:       uuid.Nil,
 					AmountToPurchase: 100.0,
 					CustomerID:       td.CustomerUUID,
@@ -572,7 +570,7 @@ func TestClient(t *testing.T) {
 			})
 
 			t.Run("ZeroAmount", func(t *testing.T) {
-				_, err := client.GenerateVoucher(&GenerateVoucherForCustomerRequest{
+				_, err := client.GenerateVoucherForCustomer(&GenerateVoucherForCustomerRequest{
 					CurrencyId:       td.CurrencyUUID,
 					AmountToPurchase: 0,
 					CustomerID:       td.CustomerUUID,
@@ -662,10 +660,9 @@ func TestClient(t *testing.T) {
 
 		t.Run("CreateInvoice", func(t *testing.T) {
 			req := &CreateInvoiceRequest{
-				MerchantUserId: td.TestUUID,
-				InvoiceDate:    time.Now(),
-				DueDate:        time.Now().AddDate(0, 0, 30),
-				CurrencyId:     td.CurrencyUUID,
+				InvoiceDate: time.Now(),
+				DueDate:     time.Now().AddDate(0, 0, 30),
+				CurrencyId:  td.CurrencyUUID,
 				InvoiceItems: []InvoiceItemRequest{
 					{
 						Description: "Test Item",

@@ -229,9 +229,9 @@ type AddNewCustomer struct {
 }
 
 type UpdatCustomer struct {
-	ID    string `json:"id" validate:"required"`
-	Name  string `json:"name" validate:"required"`
-	Email string `json:"email" validate:"email,required"`
+	ID    uuid.UUID `json:"id" validate:"required"`
+	Name  string    `json:"name" validate:"required"`
+	Email string    `json:"email" validate:"email,required"`
 }
 
 type GenerateVoucherForCustomerRequest struct {
@@ -249,7 +249,9 @@ type ErrorResponse struct {
 }
 
 type CreateInvoiceRequest struct {
-	MerchantUserId      uuid.UUID            `json:"merchantUserId" validate:"required"`
+	FullName            string               `json:"fullName" validate:"required"`
+	Email               string               `json:"email" validate:"email,required"`
+	MerchantCode        string               `json:"merchantCode" validate:"required"`
 	InvoiceDate         time.Time            `json:"invoiceDate" validate:"required"`
 	DueDate             time.Time            `json:"dueDate" validate:"required"`
 	InvoiceItems        []InvoiceItemRequest `json:"invoiceItems" validate:"required"`
@@ -302,24 +304,24 @@ type InvoiceItem struct {
 }
 
 type Invoice struct {
-	ID                uuid.UUID         `json:"id"`
-	InvoiceNumber     string            `json:"invoiceNumber"`
-	MerchantUser      MerchantUserDatas `json:"merchantUser"`
-	UserId            *uuid.UUID        `json:"userId"`
-	InvoiceDate       time.Time         `json:"invoiceDate"`
-	DueDate           time.Time         `json:"dueDate"`
-	TotalAmount       float64           `json:"totalAmount"`
-	Status            string            `json:"status"`
-	InvoiceItems      []InvoiceItem     `json:"invoiceItems"`
-	Currency          CurrencyDetails   `json:"currency"`
-	BlockchainNetwork *NetworkDetails   `json:"blockchainNetwork"`
-	CreatedAt         time.Time         `json:"createdAt"`
-	UpdatedAt         time.Time         `json:"updatedAt"`
+	ID                uuid.UUID       `json:"id"`
+	InvoiceNumber     string          `json:"invoiceNumber"`
+	UserId            *uuid.UUID      `json:"userId"`
+	Email             string          `json:"email"`
+	FullName          string          `json:"fullName"`
+	InvoiceDate       time.Time       `json:"invoiceDate"`
+	DueDate           time.Time       `json:"dueDate"`
+	TotalAmount       float64         `json:"totalAmount"`
+	Status            string          `json:"status"`
+	InvoiceItems      []InvoiceItem   `json:"invoiceItems"`
+	Currency          CurrencyDetails `json:"currency"`
+	BlockchainNetwork *NetworkDetails `json:"blockchainNetwork"`
+	CreatedAt         time.Time       `json:"createdAt"`
+	UpdatedAt         time.Time       `json:"updatedAt"`
 }
 
 type AllowedInvoiceCurrency struct {
-	IsEnabled bool            `json:""`
-	Currency  CurrencyDetails `json:"currency" validate:"omitempty"`
+	Currency CurrencyDetails `json:"currency" validate:"omitempty"`
 }
 
 type FetchAllAllowedInvoiceCurrencyResponse struct {
