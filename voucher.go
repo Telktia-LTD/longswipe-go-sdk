@@ -50,7 +50,11 @@ func (c *Client) RedeemVoucher(body *RedeemRequest) (*SuccessResponse, error) {
 	return &redeemVoucher, nil
 }
 
+<<<<<<< HEAD
 func (c *Client) GenerateVoucherForCustomer(body *GenerateVoucherForCustomerRequest) (*SuccessResponse, error) {
+=======
+func (c *Client) GenerateVoucher(body *GenerateVoucherForCustomerRequest) (*SuccessResponse, error) {
+>>>>>>> a11357c (invoice)
 	endpoint := "/merchant-integrations-server/generate-voucher-for-customer"
 	var res SuccessResponse
 

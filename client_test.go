@@ -1,5 +1,48 @@
 package longswipe
 
+/*
+LongSwipe Go SDK Test Suite
+
+This test suite is designed to be easily extensible for testing all SDK functionalities.
+
+## Current Test Coverage:
+- Invoice Operations (Create, Get/List, Approve)
+
+## Adding New Test Suites:
+
+To add tests for other functionalities like Vouchers, follow this pattern:
+
+1. Add mock data generators (similar to generateMockInvoiceCreateRequest)
+2. Add test suite function (similar to TestInvoiceOperations)
+3. Add individual test functions for each operation
+4. Add integration workflow tests
+
+Example for Voucher tests:
+
+```go
+// Mock data generators
+func generateMockRedeemRequest() *RedeemRequest { ... }
+func generateMockVoucherResponse() *VerifyVoucherResponse { ... }
+
+// Test suite
+func TestVoucherOperations(t *testing.T) {
+	t.Run("RedeemVoucher", TestRedeemVoucher)
+	t.Run("VerifyVoucher", TestVerifyVoucher)
+	t.Run("GenerateVoucher", TestGenerateVoucher)
+}
+
+// Individual tests
+func TestRedeemVoucher(t *testing.T) { ... }
+func TestVerifyVoucher(t *testing.T) { ... }
+```
+
+## Test Structure:
+- Each operation has Success, Error, and Edge case scenarios
+- Mock HTTP server simulates API responses
+- Clean separation of test data generation
+- Comprehensive assertions for both positive and negative cases
+*/
+
 import (
 	"encoding/json"
 	"net/http"
