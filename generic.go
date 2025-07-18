@@ -19,11 +19,7 @@ func (c *Client) GetAllNetwork() (*CryptoNetworkResponse, error) {
 
 func (c *Client) GetAllCurrency() (*FetchCurrenciesResponse, error) {
 	endpoint := "/merchant-integrations/fetch-supported-currencies"
-<<<<<<< HEAD
 	var currencies FetchCurrenciesResponse
-=======
-	var currencies *FetchCurrenciesResponse
->>>>>>> a11357c (invoice)
 	err := c.doRequestAndUnmarshal(
 		GET,
 		endpoint,

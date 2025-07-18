@@ -441,7 +441,7 @@ func TestClient(t *testing.T) {
 	ts := setupTestServer(td)
 	defer ts.Close()
 
-	client := NewClient(ClientConfig{
+	client := NewClient(LongSwipeConfig{
 		BaseURL:    ts.URL,
 		PublicKey:  "test_pk",
 		PrivateKey: "test_sk",
@@ -653,7 +653,7 @@ func TestClient(t *testing.T) {
 
 	t.Run("ErrorCases", func(t *testing.T) {
 		t.Run("InvalidURL", func(t *testing.T) {
-			badClient := NewClient(ClientConfig{
+			badClient := NewClient(LongSwipeConfig{
 				BaseURL:    "http://invalid-url",
 				PublicKey:  "test_pk",
 				PrivateKey: "test_sk",
