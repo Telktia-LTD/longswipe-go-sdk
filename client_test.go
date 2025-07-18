@@ -380,39 +380,6 @@ func setupTestServer(td TestData) *httptest.Server {
 			}
 
 			json.NewEncoder(w).Encode(td.RedemptionResp)
-		case "/merchant-integrations-server/generate-voucher-for-customer":
-			var req GenerateVoucherForCustomerRequest
-			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(ErrorResponse{
-					Status:  "error",
-					Message: "Invalid request",
-					Code:    400,
-				})
-				return
-			}
-
-			if req.CurrencyId == uuid.Nil {
-				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(ErrorResponse{
-					Status:  "error",
-					Message: "Currency ID is required",
-					Code:    400,
-				})
-				return
-			}
-
-			if req.AmountToPurchase <= 0 {
-				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(ErrorResponse{
-					Status:  "error",
-					Message: "Amount must be positive",
-					Code:    400,
-				})
-				return
-			}
-
-			json.NewEncoder(w).Encode(td.SuccessResp)
 		case "/merchant-integrations/fetch-supported-cryptonetworks":
 			json.NewEncoder(w).Encode(td.NetworkResp)
 		case "/merchant-integrations/fetch-supported-currencies":
@@ -579,47 +546,6 @@ func TestClient(t *testing.T) {
 				})
 				if err == nil {
 					t.Error("Expected error for invalid amount, got nil")
-				}
-			})
-		})
-
-		t.Run("GenerateVoucher", func(t *testing.T) {
-			t.Run("Success", func(t *testing.T) {
-				res, err := client.GenerateVoucherForCustomer(&GenerateVoucherForCustomerRequest{
-					CurrencyId:          td.CurrencyUUID,
-					AmountToPurchase:    100.0,
-					CustomerID:          td.CustomerUUID,
-					OnChain:             true,
-					BlockchainNetworkId: td.NetworkUUID,
-				})
-				if err != nil {
-					t.Fatalf("GenerateVoucher failed: %v", err)
-				}
-
-				if res.Status != "success" {
-					t.Errorf("Expected status 'success', got '%s'", res.Status)
-				}
-			})
-
-			t.Run("InvalidCurrency", func(t *testing.T) {
-				_, err := client.GenerateVoucherForCustomer(&GenerateVoucherForCustomerRequest{
-					CurrencyId:       uuid.Nil,
-					AmountToPurchase: 100.0,
-					CustomerID:       td.CustomerUUID,
-				})
-				if err == nil {
-					t.Error("Expected error for invalid currency, got nil")
-				}
-			})
-
-			t.Run("ZeroAmount", func(t *testing.T) {
-				_, err := client.GenerateVoucherForCustomer(&GenerateVoucherForCustomerRequest{
-					CurrencyId:       td.CurrencyUUID,
-					AmountToPurchase: 0,
-					CustomerID:       td.CustomerUUID,
-				})
-				if err == nil {
-					t.Error("Expected error for zero amount, got nil")
 				}
 			})
 		})

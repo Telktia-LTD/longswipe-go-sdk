@@ -24,13 +24,13 @@ type ApiResponse[T any] struct {
 }
 
 type RedeemRequest struct {
-	VoucherCode            string  `json:"voucherCode" validate:"required"`
-	Amount                 float64 `json:"amount" validate:"required"`
-	LockPin                string  `json:"lockPin" validate:"omitempty"`
-	WalletAddress          string  `json:"walletAddress" validate:"omitempty"`
-	ToCurrencyAbbreviation string  `json:"toCurrencyAbbreviation" validate:"omitempty"`
-	ReferenceId            string  `json:"referenceId" validate:"omitempty"`
-	MetaData               string  `json:"metaData" validate:"omitempty"`
+	VoucherCode            string            `json:"voucherCode" validate:"required"`
+	Amount                 float64           `json:"amount" validate:"required"`
+	LockPin                string            `json:"lockPin" validate:"omitempty"`
+	WalletAddress          string            `json:"walletAddress" validate:"omitempty"`
+	ToCurrencyAbbreviation string            `json:"toCurrencyAbbreviation" validate:"omitempty"`
+	ReferenceId            string            `json:"referenceId" validate:"omitempty"`
+	MetaData               map[string]string `json:"metaData" validate:"omitempty"`
 }
 
 type UserResponse struct {
@@ -50,24 +50,23 @@ type UserResponse struct {
 }
 
 type VoucherResponse struct {
-	ID                        uuid.UUID         `json:"id"`
-	Amount                    float64           `json:"amount"`
-	Balance                   float64           `json:"balance"`
-	GeneratedCurrency         CurrencyDetails   `json:"generatedCurrency"`
-	Code                      string            `json:"code"`
-	WasPaidFor                bool              `json:"wasPaidFor"`
-	IsUsed                    bool              `json:"isUsed"`
-	CreatedAt                 time.Time         `json:"createdAt"`
-	CreatedForMerchant        bool              `json:"createdForMerchant"`
-	CreatedForExistingUser    bool              `json:"createdForExistingUser"`
-	CreatedForNonExistingUser bool              `json:"createdForNonExistingUser"`
-	IsLocked                  bool              `json:"isLocked"`
-	OnChain                   bool              `json:"onchain"`
-	OnChainProcessing         bool              `json:"onchainProcessing"`
-	CryptoVoucherDetails      *CryptoVoucher    `json:"cryptoVoucherDetails"`
-	RedeemedVouchers          []RedeemedVoucher `json:"redeemedVouchers"`
-	TransactionHash           string            `json:"transactionHash"`
-	MetaData                  string            `json:"metaData"`
+	ID                        uuid.UUID       `json:"id"`
+	Amount                    float64         `json:"amount"`
+	Balance                   float64         `json:"balance"`
+	GeneratedCurrency         CurrencyDetails `json:"generatedCurrency"`
+	Code                      string          `json:"code"`
+	WasPaidFor                bool            `json:"wasPaidFor"`
+	IsUsed                    bool            `json:"isUsed"`
+	CreatedAt                 time.Time       `json:"createdAt"`
+	CreatedForMerchant        bool            `json:"createdForMerchant"`
+	CreatedForExistingUser    bool            `json:"createdForExistingUser"`
+	CreatedForNonExistingUser bool            `json:"createdForNonExistingUser"`
+	IsLocked                  bool            `json:"isLocked"`
+	OnChain                   bool            `json:"onchain"`
+	OnChainProcessing         bool            `json:"onchainProcessing"`
+	CryptoVoucherDetails      *CryptoVoucher  `json:"cryptoVoucherDetails"`
+	TransactionHash           string          `json:"transactionHash"`
+	MetaData                  string          `json:"metaData"`
 }
 type RedeemedVoucher struct {
 	ID                    uuid.UUID    `json:"id"`

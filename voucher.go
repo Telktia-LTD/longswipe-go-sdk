@@ -49,20 +49,3 @@ func (c *Client) RedeemVoucher(body *RedeemRequest) (*SuccessResponse, error) {
 	}
 	return &redeemVoucher, nil
 }
-
-func (c *Client) GenerateVoucherForCustomer(body *GenerateVoucherForCustomerRequest) (*SuccessResponse, error) {
-	endpoint := "/merchant-integrations-server/generate-voucher-for-customer"
-	var res SuccessResponse
-
-	err := c.doRequestAndUnmarshal(
-		POST,
-		endpoint,
-		body,
-		&res,
-	)
-
-	if err != nil {
-		return nil, err
-	}
-	return &res, nil
-}
