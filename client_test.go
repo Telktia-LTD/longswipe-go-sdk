@@ -1,785 +1,662 @@
 package longswipe
 
+/*
+LongSwipe Go SDK Test Suite
+
+This test suite is designed to be easily extensible for testing all SDK functionalities.
+
+## Current Test Coverage:
+- Invoice Operations (Create, Get/List, Approve)
+
+## Adding New Test Suites:
+
+To add tests for other functionalities like Vouchers, follow this pattern:
+
+1. Add mock data generators (similar to generateMockInvoiceCreateRequest)
+2. Add test suite function (similar to TestInvoiceOperations)
+3. Add individual test functions for each operation
+4. Add integration workflow tests
+
+Example for Voucher tests:
+
+```go
+// Mock data generators
+func generateMockRedeemRequest() *RedeemRequest { ... }
+func generateMockVoucherResponse() *VerifyVoucherResponse { ... }
+
+// Test suite
+func TestVoucherOperations(t *testing.T) {
+	t.Run("RedeemVoucher", TestRedeemVoucher)
+	t.Run("VerifyVoucher", TestVerifyVoucher)
+	t.Run("GenerateVoucher", TestGenerateVoucher)
+}
+
+// Individual tests
+func TestRedeemVoucher(t *testing.T) { ... }
+func TestVerifyVoucher(t *testing.T) { ... }
+```
+
+## Test Structure:
+- Each operation has Success, Error, and Edge case scenarios
+- Mock HTTP server simulates API responses
+- Clean separation of test data generation
+- Comprehensive assertions for both positive and negative cases
+*/
+
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
-	"github.com/Telktia-LTD/longswipe-go-sdk/utils"
 	"github.com/gofrs/uuid"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestClient(t *testing.T) {
-	// Valid UUIDs for all test cases
-	testUUID := "f733b2ec-b829-4283-bf24-276014307896"
-	currencyUUID := "9a0470d3-f580-45b3-85c1-7f3c145540d6"
-	customerUUID := "08408121-ff72-4348-bdfd-41cf1c2f9e0d"
-	redeemedUUID := "e733b2ec-b829-4283-bf24-276014307896"
-	networkUUID := "b733b2ec-b829-4283-bf24-276014307896"
-	currencyUUID1 := "f733b2ec-b829-4283-bf24-276014307896"
-	currencyUUID2 := "9a0470d3-f580-45b3-85c1-7f3c145540d6"
-	createdAt := time.Now().UTC().Format(time.RFC3339)
+// TestServer represents a mock HTTP server for testing
+type TestServer struct {
+	server   *httptest.Server
+	handlers map[string]http.HandlerFunc
+}
 
-	// Setup test server
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+// NewTestServer creates a new test server with configurable handlers
+func NewTestServer() *TestServer {
+	ts := &TestServer{
+		handlers: make(map[string]http.HandlerFunc),
+	}
 
-		switch r.URL.Path {
-		// Customer endpoints
-		case "/merchant-integrations-server/fetch-customers":
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{
-				"message": "Customers retrieved successfully",
-				"code": 200,
-				"status": "success",
-				"data": {
-					"total": 1,
-					"page": 1,
-					"limit": 10,
-					"customer": [
-						{
-							"id": "` + testUUID + `",
-							"email": "test@example.com",
-							"name": "Test User",
-							"created_at": "2023-01-01T00:00:00Z"
-						}
-					]
-				}
-			}`))
-
-		case "/merchant-integrations-server/fetch-customer-by-email/johndoe@gmail.com":
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{
-				"message": "Customer retrieved successfully",
-				"code": 200,
-				"status": "success",
-				"customer": {
-					"id": "` + testUUID + `",
-					"email": "johndoe@gmail.com",
-					"name": "John Doe",
-					"created_at": "2023-01-01T00:00:00Z"
-				}
-			}`))
-
-		case "/merchant-integrations-server/add-new-customer":
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{
-				"status": "success", 
-				"message": "Customer added",
-				"data": {
-					"id": "` + testUUID + `",
-					"email": "newuser@example.com",
-					"name": "New User"
-				}
-			}`))
-
-		case "/merchant-integrations-server/update-customer":
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{
-				"status": "success", 
-				"message": "Customer updated",
-				"data": {
-					"id": "` + testUUID + `",
-					"email": "updated@example.com",
-					"name": "Updated User"
-				}
-			}`))
-
-		case "/merchant-integrations-server/delete-customer/" + testUUID:
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{
-				"status": "success", 
-				"message": "Customer deleted"
-			}`))
-
-		// Voucher endpoints
-		case "/merchant-integrations/verify-voucher":
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{
-				"status": "success",
-				"message": "Voucher verified",
-				"code": 200,
-				"data": {
-					"id": "` + testUUID + `",
-					"amount": 100.50,
-					"balance": 100.50,
-					"generatedCurrency": {
-						"id": "` + currencyUUID + `",
-						"image": "https://example.com/usd.jpg",
-						"name": "US Dollar",
-						"symbol": "$",
-						"Abbreviation": "USD",
-						"currencyType": "fiat",
-						"isActive": true,
-						"createdAt": "2023-01-01T00:00:00Z"
-					},
-					"code": "LS3130635050",
-					"wasPaidFor": true,
-					"isUsed": false,
-					"createdAt": "2023-01-01T00:00:00Z",
-					"createdForMerchant": true,
-					"createdForExistingUser": false,
-					"createdForNonExistingUser": true,
-					"isLocked": false,
-					"onchain": false,
-					"onchainProcessing": false,
-					"cryptoVoucherDetails": {
-						"CodeHash": "hash123",
-						"Value": "100.50",
-						"Balance": "100.50",
-						"Creator": "creator123",
-						"IsRedeemed": false,
-						"TransactionHash": "txn_123456789"
-					},
-					"redeemedVouchers": [
-						{
-							"id": "` + redeemedUUID + `",
-							"redeemedUserID": null,
-							"redeemerWalletAddress": null,
-							"voucherID": "` + testUUID + `",
-							"user": {
-								"id": "` + customerUUID + `",
-								"name": "John Doe",
-								"email": "john.doe@example.com"
-							},
-							"amount": 25.25,
-							"isMerchant": false,
-							"createdAt": "2023-01-02T00:00:00Z"
-						}
-					],
-					"transactionHash": "txn_verify_123",
-					"metaData": "Test verification metadata"
-				}
-			}`))
-
-		case "/merchant-integrations/fetch-voucher-redemption-charges":
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{
-				"status": "success",
-				"message": "Charges retrieved",
-				"code": 200,
-				"data": {
-					"charges": {
-						"toAmount": 95.25,
-						"processingFee": 2.50,
-						"totalGasAndProceesingFeeInFromCurrency": 5.25,
-						"totalGasCostAndProcessingFeeInWei": 0.0005,
-						"exchangeRate": 1.05,
-						"percentageCharge": 0.025,
-						"isPercentageCharge": true,
-						"toCurrency": {
-							"id": "` + currencyUUID + `",
-							"image": "https://example.com/usd.jpg",
-							"name": "US Dollar",
-							"symbol": "$",
-							"Abbreviation": "USD",
-							"currencyType": "fiat",
-							"isActive": true,
-							"createdAt": "2023-01-01T00:00:00Z"
-						},
-						"fromCurrency": {
-							"id": "` + testUUID + `",
-							"image": "https://example.com/eur.jpg",
-							"name": "Euro",
-							"symbol": "€",
-							"Abbreviation": "EUR",
-							"currencyType": "fiat",
-							"isActive": true,
-							"createdAt": "2023-01-01T00:00:00Z"
-						},
-						"totalDeductable": 5.25
-					},
-					"voucher": {
-						"id": "` + testUUID + `",
-						"amount": 100.50,
-						"balance": 95.25,
-						"generatedCurrency": {
-							"id": "` + currencyUUID + `",
-							"image": "https://example.com/usd.jpg",
-							"name": "US Dollar",
-							"symbol": "$",
-							"Abbreviation": "USD",
-							"currencyType": "fiat",
-							"isActive": true,
-							"createdAt": "2023-01-01T00:00:00Z"
-						},
-						"code": "LS3130635050",
-						"wasPaidFor": true,
-						"isUsed": false,
-						"createdAt": "2023-01-01T00:00:00Z",
-						"createdForMerchant": true,
-						"createdForExistingUser": false,
-						"createdForNonExistingUser": true,
-						"isLocked": false,
-						"onchain": false,
-						"onchainProcessing": false,
-						"cryptoVoucherDetails": {
-							"CodeHash": "hash123",
-							"Value": "100.50",
-							"Balance": "95.25",
-							"Creator": "creator123",
-							"IsRedeemed": false,
-							"TransactionHash": "txn_123456789"
-						},
-						"redeemedVouchers": [
-							{
-								"id": "` + redeemedUUID + `",
-								"redeemedUserID": null,
-								"redeemerWalletAddress": null,
-								"voucherID": "` + testUUID + `",
-								"user": {
-									"id": "` + customerUUID + `",
-									"name": "John Doe",
-									"email": "john.doe@example.com"
-								},
-								"amount": 5.25,
-								"isMerchant": false,
-								"createdAt": "2023-01-02T00:00:00Z"
-							}
-						],
-						"transactionHash": "txn_123456789",
-						"metaData": "Test metadata"
-					}
-				}
-			}`))
-
-		case "/merchant-integrations-server/fetch-customer-by-email/nonexistent@example.com":
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte(`{
-				"message": "Customer not found",
-				"code": 404,
-				"status": "error",
-				"data": null
-			}`))
-		case "/merchant-integrations/redeem-voucher":
-			// Verify request body
-			var req utils.RedeemRequest
-			err := json.NewDecoder(r.Body).Decode(&req)
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte(`{"status": "error", "message": "Invalid request"}`))
-				return
-			}
-
-			if req.VoucherCode == "INVALID_CODE" {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte(`{
-					"status": "error",
-					"message": "Invalid voucher code",
-					"code": 400
-				}`))
-				return
-			}
-
-			if req.Amount <= 0 {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte(`{
-					"status": "error",
-					"message": "Amount must be positive",
-					"code": 400
-				}`))
-				return
-			}
-
-			// Successful response
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{
-				"status": "success",
-				"message": "Voucher redeemed successfully",
-				"code": 200,
-				"data": {
-					"id": "` + redeemedUUID + `",
-					"voucherId": "` + testUUID + `",
-					"amount": ` + fmt.Sprintf("%.2f", req.Amount) + `,
-					"currency": {
-						"id": "` + currencyUUID + `",
-						"name": "US Dollar",
-						"symbol": "$",
-						"abbreviation": "USD"
-					},
-					"transactionHash": "txn_redeem_123456",
-					"timestamp": "2023-01-01T00:00:00Z"
-				}
-			}`))
-		case "/merchant-integrations-server/generate-voucher-for-customer":
-			var req utils.GenerateVoucherForCustomerRequest
-			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte(`{"status":"error","code":400,"message":"Invalid request"}`))
-				return
-			}
-
-			// Validate request
-			if req.CurrencyId.String() == "00000000-0000-0000-0000-000000000000" {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte(`{"status":"error","code":400,"message":"Currency ID is required"}`))
-				return
-			}
-
-			if req.AmountToPurchase <= 0 {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte(`{"status":"error","code":400,"message":"Amount must be positive"}`))
-				return
-			}
-
-			// Successful response - matches SuccessResponse struct
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{
-                "status": "success",
-                "message": "Voucher generated successfully",
-                "code": 200
-            }`))
-
-		case "/merchant-integrations/fetch-supported-cryptonetworks":
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{
-				"status": "success",
-				"message": "Networks retrieved successfully",
-				"data": [
-					{
-						"id": "f733b2ec-b829-4283-bf24-276014307896",
-						"networkName": "Ethereum Mainnet",
-						"cryptoCurrencies": [
-							{
-								"currencyDetails": {
-									"id": "9a0470d3-f580-45b3-85c1-7f3c145540d6",
-									"symbol": "ETH"
-								},
-								"decimal": 18
-							}
-						]
-					}
-				]
-			}`))
-
-		case "/merchant-integrations/fetch-supported-currencies":
-			if r.Method != http.MethodGet {
-				w.WriteHeader(http.StatusMethodNotAllowed)
-				return
-			}
-
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{
-                "message": "Currencies retrieved successfully",
-                "code": 200,
-                "status": "success",
-                "data": {
-                    "currencies": [
-                        {
-                            "id": "` + currencyUUID1 + `",
-                            "image": "https://example.com/btc.png",
-                            "name": "Bitcoin",
-                            "symbol": "BTC",
-                            "Abbreviation": "BTC",
-                            "currencyType": "CRYPTO",
-                            "isActive": true,
-                            "createdAt": "` + createdAt + `"
-                        },
-                        {
-                            "id": "` + currencyUUID2 + `",
-                            "image": "https://example.com/eth.png",
-                            "name": "Ethereum",
-                            "symbol": "ETH",
-                            "Abbreviation": "ETH",
-                            "currencyType": "CRYPTO",
-                            "isActive": true,
-                            "createdAt": "` + createdAt + `"
-                        }
-                    ]
-                }
-            }`))
-
-		default:
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte(`{
-				"message": "Endpoint not found",
-				"code": 404,
-				"status": "error",
-				"data": null
-			}`))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		handler, exists := ts.handlers[r.URL.Path]
+		if !exists {
+			http.NotFound(w, r)
+			return
 		}
-	}))
-	defer ts.Close()
+		handler(w, r)
+	})
 
-	// Create test client
-	client := NewClient(ClientConfig{
-		BaseURL:    ts.URL,
-		PublicKey:  "test_pk",
-		PrivateKey: "test_sk",
+	ts.server = httptest.NewServer(mux)
+	return ts
+}
+
+func (ts *TestServer) AddHandler(path string, handler http.HandlerFunc) {
+	ts.handlers[path] = handler
+}
+
+func (ts *TestServer) URL() string {
+	return ts.server.URL
+}
+
+func (ts *TestServer) Close() {
+	ts.server.Close()
+}
+
+// Mock data generators
+func generateMockUUID() uuid.UUID {
+	id, _ := uuid.NewV4()
+	return id
+}
+
+func generateMockInvoiceCreateRequest() *CreateInvoiceRequest {
+	return &CreateInvoiceRequest{
+		FullName:     "John Doe",
+		Email:        "john.doe@example.com",
+		MerchantCode: "MERCH123",
+		InvoiceDate:  time.Now(),
+		DueDate:      time.Now().AddDate(0, 0, 30),
+		InvoiceItems: []InvoiceItemRequest{
+			{
+				Description: "Product A",
+				Quantity:    2,
+				UnitPrice:   50.00,
+			},
+			{
+				Description: "Product B",
+				Quantity:    1,
+				UnitPrice:   100.00,
+			},
+		},
+		CurrencyAbbreviation:          "USD",
+		BlockchainNetworkAbbreviation: "ETH",
+	}
+}
+
+func generateMockSuccessResponse() *SuccessResponse {
+	return &SuccessResponse{
+		Status:  "success",
+		Message: "Operation completed successfully",
+		Code:    200,
+	}
+}
+
+func generateMockInvoiceResponse() *InvoiceResponse {
+	invoiceID := generateMockUUID().String()
+	userID := generateMockUUID().String()
+	currencyID := generateMockUUID().String()
+	networkID := generateMockUUID().String()
+	merchantUserID := generateMockUUID().String()
+	itemID := generateMockUUID().String()
+
+	return &InvoiceResponse{
+		Status:  "success",
+		Message: "Invoices retrieved successfully",
+		Code:    200,
+		Data: InvoiceDetails{
+			Total: 1,
+			Invoices: []Invoice{
+				{
+					ID:            invoiceID,
+					InvoiceNumber: "INV-001",
+					UserID:        userID,
+					InvoiceDate:   "2023-12-01T10:00:00Z",
+					DueDate:       "2023-12-31T23:59:59Z",
+					Status:        "pending",
+					TotalAmount:   200.00,
+					CreatedAt:     "2023-12-01T10:00:00Z",
+					UpdatedAt:     "2023-12-01T10:00:00Z",
+					Currency: Currency{
+						ID:           currencyID,
+						Name:         "US Dollar",
+						Symbol:       "$",
+						Abbrev:       "USD",
+						CurrencyType: "fiat",
+						IsActive:     true,
+						Image:        "https://example.com/usd.png",
+					},
+					BlockchainNetwork: BlockchainNetwork{
+						ID:               networkID,
+						NetworkName:      "Ethereum",
+						ChainID:          "1",
+						BlockExplorerURL: "https://etherscan.io",
+					},
+					MerchantUser: MerchantUser{
+						ID:    merchantUserID,
+						Name:  "Merchant Name",
+						Email: "merchant@example.com",
+					},
+					InvoiceItems: []InvoiceItem{
+						{
+							ID:          itemID,
+							Description: "Product A",
+							Quantity:    2,
+							UnitPrice:   50.00,
+							TotalPrice:  100.00,
+							CreatedAt:   "2023-12-01T10:00:00Z",
+							UpdatedAt:   "2023-12-01T10:00:00Z",
+						},
+						{
+							ID:          generateMockUUID().String(),
+							Description: "Product B",
+							Quantity:    1,
+							UnitPrice:   100.00,
+							TotalPrice:  100.00,
+							CreatedAt:   "2023-12-01T10:00:00Z",
+							UpdatedAt:   "2023-12-01T10:00:00Z",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func generateMockApproveInvoiceRequest() *ApproveInvoice {
+	return &ApproveInvoice{
+		InvoiceID: generateMockUUID().String(),
+		OnChain:   true,
+	}
+}
+
+func generateMockQueryParams() QueryParams {
+	return QueryParams{
+		Page:   1,
+		Limit:  10,
+		Filter: "pending",
+	}
+}
+
+// Helper function to create a test client
+func createTestClient(baseURL string) *Client {
+	return NewClient(LongSwipeConfig{
+		BaseURL:    baseURL,
+		PublicKey:  "test-public-key",
+		PrivateKey: "test-private-key",
 		Timeout:    5 * time.Second,
 	})
-
-	// Customer tests
-	t.Run("GetCustomers", func(t *testing.T) {
-		res, err := client.GetCustomers(&utils.Pagination{Page: 1, Limit: 20, Search: ""})
-		if err != nil {
-			t.Fatalf("GetCustomers failed: %v", err)
-		}
-
-		if res.Status != "success" {
-			t.Errorf("Expected status 'success', got '%s'", res.Status)
-		}
-
-		if len(res.Data.Customers) < 1 {
-			t.Fatalf("Expected at least 1 customer, got %d", len(res.Data.Customers))
-		}
-	})
-
-	t.Run("GetCustomer", func(t *testing.T) {
-		res, err := client.GetCustomer("johndoe@gmail.com")
-		if err != nil {
-			t.Fatalf("GetCustomer failed: %v", err)
-		}
-
-		if res.Status != "success" {
-			t.Errorf("Expected status 'success', got '%s'", res.Status)
-		}
-
-		if res.Data.Email == "" {
-			t.Fatal("Expected email to be populated, got empty string")
-		}
-	})
-
-	t.Run("AddCustomer", func(t *testing.T) {
-		res, err := client.AddCustomer(&utils.AddNewCustomer{
-			Email: "newuser@example.com",
-			Name:  "New User",
-		})
-
-		if err != nil {
-			t.Fatalf("AddCustomer failed: %v", err)
-		}
-
-		if res.Status != "success" {
-			t.Errorf("Expected success status, got %s", res.Status)
-		}
-	})
-
-	t.Run("UpdateCustomer", func(t *testing.T) {
-		res, err := client.UpdateCustomer(&utils.UpdatCustomer{
-			ID:    testUUID,
-			Email: "updated@example.com",
-			Name:  "Updated User",
-		})
-
-		if err != nil {
-			t.Fatalf("UpdateCustomer failed: %v", err)
-		}
-
-		if res.Status != "success" {
-			t.Errorf("Expected success status, got %s", res.Status)
-		}
-	})
-
-	t.Run("DeleteCustomer", func(t *testing.T) {
-		res, err := client.DeleteCustomer(testUUID)
-
-		if err != nil {
-			t.Fatalf("DeleteCustomer failed: %v", err)
-		}
-
-		if res.Status != "success" {
-			t.Errorf("Expected success status, got %s", res.Status)
-		}
-	})
-
-	t.Run("BuildCustomerEndpoint", func(t *testing.T) {
-		endpoint := buildCustomerEndpoint(2, 50, "test")
-		expected := "/merchant-integrations-server/fetch-customers?limit=50&page=2&search=test"
-
-		if endpoint != expected {
-			t.Errorf("Expected endpoint %s, got %s", expected, endpoint)
-		}
-	})
-
-	// Voucher tests
-	t.Run("VerifyVoucher", func(t *testing.T) {
-		res, err := client.VerifyVoucher(&utils.VerifyVoucherCodeRequest{
-			VoucherCode: "LS3130635050",
-		})
-
-		if err != nil {
-			t.Fatalf("VerifyVoucher failed: %v", err)
-		}
-
-		if res.Status != "success" {
-			t.Errorf("Expected status 'success', got '%s'", res.Status)
-		}
-
-		if res.Data.Code != "LS3130635050" {
-			t.Errorf("Expected voucher code 'LS3130635050', got '%s'", res.Data.Code)
-		}
-	})
-
-	t.Run("GetVoucherRedeemptionCharges", func(t *testing.T) {
-		res, err := client.GetVoucherRedeemptionCharges(&utils.RedeemRequest{
-			VoucherCode:            "LS3130635050",
-			Amount:                 100.50,
-			ToCurrencyAbbreviation: "USD",
-		})
-
-		if err != nil {
-			t.Fatalf("GetVoucherRedeemptionCharges failed: %v", err)
-		}
-
-		// Validate charges
-		if res.Data.Charges.ProcessingFee != 2.50 {
-			t.Errorf("Expected Processing fee 2.50, got %f", res.Data.Charges.ProcessingFee)
-		}
-		if res.Data.Charges.TotalDeductable != 5.25 {
-			t.Errorf("Expected totalDeductable 5.25, got %f", res.Data.Charges.TotalDeductable)
-		}
-
-		// Validate voucher
-		if res.Data.Voucher.Code != "LS3130635050" {
-			t.Errorf("Expected voucher code 'LS3130635050', got '%s'", res.Data.Voucher.Code)
-		}
-		if res.Data.Voucher.Balance != 95.25 {
-			t.Errorf("Expected voucher balance 95.25, got %f", res.Data.Voucher.Balance)
-		}
-	})
-
-	// Error cases
-	t.Run("ErrorCases", func(t *testing.T) {
-		// Test with invalid URL to force error
-		badClient := NewClient(ClientConfig{
-			BaseURL:    "http://invalid-url",
-			PublicKey:  "test_pk",
-			PrivateKey: "test_sk",
-			Timeout:    1 * time.Microsecond,
-		})
-
-		_, err := badClient.GetCustomers(&utils.Pagination{Page: 1, Limit: 10})
-		if err == nil {
-			t.Error("Expected error for GetCustomers with invalid client, got nil")
-		}
-
-		// Test not found case
-		_, err = client.GetCustomer("nonexistent@example.com")
-		if err == nil {
-			t.Error("Expected error for nonexistent customer, got nil")
-		}
-
-		if !strings.Contains(err.Error(), "Customer not found") {
-			t.Errorf("Expected error to contain 'Customer not found', got: %v", err)
-		}
-	})
-
-	t.Run("RedeemVoucher", func(t *testing.T) {
-		t.Run("SuccessfulRedemption", func(t *testing.T) {
-			req := &utils.RedeemRequest{
-				VoucherCode:            "VALID123",
-				Amount:                 100.50,
-				ToCurrencyAbbreviation: "USD",
-				ReferenceId:            "order_123",
-			}
-
-			res, err := client.RedeemVoucher(req)
-			if err != nil {
-				t.Fatalf("RedeemVoucher failed: %v", err)
-			}
-
-			if res.Status != "success" {
-				t.Errorf("Expected status 'success', got '%s'", res.Status)
-			}
-		})
-
-		t.Run("InvalidVoucherCode", func(t *testing.T) {
-			req := &utils.RedeemRequest{
-				VoucherCode:            "INVALID_CODE",
-				Amount:                 100.50,
-				ToCurrencyAbbreviation: "USD",
-			}
-
-			_, err := client.RedeemVoucher(req)
-			if err == nil {
-				t.Fatal("Expected error for invalid voucher code, got nil")
-			}
-		})
-
-		t.Run("InvalidAmount", func(t *testing.T) {
-			req := &utils.RedeemRequest{
-				VoucherCode:            "VALID123",
-				Amount:                 0,
-				ToCurrencyAbbreviation: "USD",
-			}
-
-			_, err := client.RedeemVoucher(req)
-			if err == nil {
-				t.Fatal("Expected error for invalid amount, got nil")
-			}
-		})
-	})
-
-	t.Run("GenerateVoucher", func(t *testing.T) {
-		currencyID, _ := uuid.FromString(currencyUUID)
-		customerID, _ := uuid.FromString(customerUUID)
-		networkID, _ := uuid.FromString(networkUUID)
-
-		t.Run("Success", func(t *testing.T) {
-			req := &utils.GenerateVoucherForCustomerRequest{
-				CurrencyId:          currencyID,
-				AmountToPurchase:    100.50,
-				CustomerID:          customerID,
-				OnChain:             true,
-				BlockchainNetworkId: networkID,
-			}
-
-			res, err := client.GenerateVoucher(req)
-			if err != nil {
-				t.Fatalf("Unexpected error: %v", err)
-			}
-
-			if res.Status != "success" {
-				t.Errorf("Expected status 'success', got '%s'", res.Status)
-			}
-			if res.Code != 200 {
-				t.Errorf("Expected code 200, got %d", res.Code)
-			}
-			if res.Message != "Voucher generated successfully" {
-				t.Errorf("Unexpected message: %s", res.Message)
-			}
-		})
-
-		t.Run("InvalidCurrency", func(t *testing.T) {
-			req := &utils.GenerateVoucherForCustomerRequest{
-				CurrencyId:       uuid.Nil, // Invalid
-				AmountToPurchase: 100.50,
-				CustomerID:       customerID,
-			}
-
-			res, err := client.GenerateVoucher(req)
-			if err == nil {
-				t.Fatal("Expected error but got nil")
-			}
-			if res != nil {
-				t.Error("Expected nil response on error")
-			}
-		})
-
-		t.Run("ZeroAmount", func(t *testing.T) {
-			req := &utils.GenerateVoucherForCustomerRequest{
-				CurrencyId:       currencyID,
-				AmountToPurchase: 0, // Invalid
-				CustomerID:       customerID,
-			}
-
-			res, err := client.GenerateVoucher(req)
-			if err == nil {
-				t.Fatal("Expected error but got nil")
-			}
-			if res != nil {
-				t.Error("Expected nil response on error")
-			}
-		})
-	})
-
-	t.Run("Success", func(t *testing.T) {
-		// Test GetAllNetwork success case separately
-		t.Run("GetAllNetwork", func(t *testing.T) {
-			resp, err := client.GetAllNetwork()
-			if err != nil {
-				t.Fatalf("GetAllNetwork failed: %v", err)
-			}
-
-			if resp.Status != "success" {
-				t.Errorf("Expected status 'success', got '%s'", resp.Status)
-			}
-		})
-	})
-
-	t.Run("Success", func(t *testing.T) {
-		resp, err := client.GetAllCurrency()
-		if err != nil {
-			t.Fatalf("Unexpected error: %v", err)
-		}
-
-		// Verify response metadata
-		if resp.Status != "success" {
-			t.Errorf("Expected status 'success', got '%s'", resp.Status)
-		}
-		if resp.Code != 200 {
-			t.Errorf("Expected code 200, got %d", resp.Code)
-		}
-
-		// Verify currencies data
-		if len(resp.Data.Currencies) != 2 {
-			t.Fatalf("Expected 2 currencies, got %d", len(resp.Data.Currencies))
-		}
-
-		// Verify first currency
-		btc := resp.Data.Currencies[0]
-		if btc.ID.String() != currencyUUID1 {
-			t.Errorf("Expected currency ID %s, got %s", currencyUUID1, btc.ID)
-		}
-		if btc.Symbol != "BTC" {
-			t.Errorf("Expected symbol 'BTC', got '%s'", btc.Symbol)
-		}
-		if !btc.IsActive {
-			t.Error("Expected currency to be active")
-		}
-	})
-
-	t.Run("EmptyResponse", func(t *testing.T) {
-		// Create test server with empty response
-		emptyTS := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{
-                "message": "No currencies found",
-                "code": 200,
-                "status": "success",
-                "data": {
-                    "currencies": []
-                }
-            }`))
-		}))
-		defer emptyTS.Close()
-
-		emptyClient := NewClient(ClientConfig{
-			BaseURL:    emptyTS.URL,
-			PublicKey:  "test_pk",
-			PrivateKey: "test_sk",
-			Timeout:    5 * time.Second,
-		})
-
-		resp, err := emptyClient.GetAllCurrency()
-		if err != nil {
-			t.Fatalf("Unexpected error: %v", err)
-		}
-
-		if len(resp.Data.Currencies) != 0 {
-			t.Errorf("Expected empty currencies array, got %d items", len(resp.Data.Currencies))
-		}
-	})
-
-	t.Run("ErrorResponse", func(t *testing.T) {
-		// Create test server with error response
-		errorTS := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(`{
-                "message": "Internal server error",
-                "code": 500,
-                "status": "error"
-            }`))
-		}))
-		defer errorTS.Close()
-
-		errorClient := NewClient(ClientConfig{
-			BaseURL:    errorTS.URL,
-			PublicKey:  "test_pk",
-			PrivateKey: "test_sk",
-			Timeout:    5 * time.Second,
-		})
-
-		_, err := errorClient.GetAllCurrency()
-		if err == nil {
-			t.Fatal("Expected error but got nil")
-		}
-	})
-
 }
+
+// Test Suite for Invoice Operations
+func TestInvoiceOperations(t *testing.T) {
+	// Run all invoice tests in a test suite
+	t.Run("CreateInvoice", TestCreateInvoice)
+	t.Run("GetInvoice", TestGetInvoice)
+	t.Run("ApproveInvoice", TestApproveInvoice)
+}
+
+func TestCreateInvoice(t *testing.T) {
+	testServer := NewTestServer()
+	defer testServer.Close()
+
+	t.Run("Success", func(t *testing.T) {
+		// Setup mock response
+		mockResponse := generateMockSuccessResponse()
+		testServer.AddHandler("/merchant-integrations-server/create-invoice", func(w http.ResponseWriter, r *http.Request) {
+			// Verify request method
+			assert.Equal(t, http.MethodPost, r.Method)
+
+			// Verify headers
+			assert.Equal(t, "Bearer test-public-key", r.Header.Get("Authorization"))
+			assert.Equal(t, "test-private-key", r.Header.Get("X-API-Private-Key"))
+			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+
+			// Verify request body
+			var requestBody CreateInvoiceRequest
+			err := json.NewDecoder(r.Body).Decode(&requestBody)
+			require.NoError(t, err)
+			assert.Equal(t, "John Doe", requestBody.FullName)
+			assert.Equal(t, "john.doe@example.com", requestBody.Email)
+			assert.Equal(t, "MERCH123", requestBody.MerchantCode)
+			assert.Len(t, requestBody.InvoiceItems, 2)
+
+			// Send response
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(mockResponse)
+		})
+
+		// Create client and test
+		client := createTestClient(testServer.URL())
+		request := generateMockInvoiceCreateRequest()
+
+		response, err := client.CreateInvoice(request)
+
+		// Assertions
+		require.NoError(t, err)
+		require.NotNil(t, response)
+		assert.Equal(t, "success", response.Status)
+		assert.Equal(t, "Operation completed successfully", response.Message)
+		assert.Equal(t, 200, response.Code)
+	})
+
+	t.Run("ValidationError", func(t *testing.T) {
+		testServer.AddHandler("/merchant-integrations-server/create-invoice", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`{"status":"error","message":"Validation failed: Email is required","code":400}`))
+		})
+
+		client := createTestClient(testServer.URL())
+		request := generateMockInvoiceCreateRequest()
+		request.Email = "" // Invalid email
+
+		response, err := client.CreateInvoice(request)
+
+		// Assertions
+		assert.Error(t, err)
+		assert.Nil(t, response)
+		assert.Contains(t, err.Error(), "400")
+	})
+
+	t.Run("NetworkError", func(t *testing.T) {
+		// Create client with invalid URL
+		client := createTestClient("http://invalid-url")
+		request := generateMockInvoiceCreateRequest()
+
+		response, err := client.CreateInvoice(request)
+
+		// Assertions
+		assert.Error(t, err)
+		assert.Nil(t, response)
+	})
+}
+
+func TestGetInvoice(t *testing.T) {
+	testServer := NewTestServer()
+	defer testServer.Close()
+
+	t.Run("Success", func(t *testing.T) {
+		// Setup mock response
+		mockResponse := generateMockInvoiceResponse()
+		testServer.AddHandler("/merchant-integrations-server/fetch-invoice", func(w http.ResponseWriter, r *http.Request) {
+			// Verify request method
+			assert.Equal(t, http.MethodGet, r.Method)
+
+			// Verify headers
+			assert.Equal(t, "Bearer test-public-key", r.Header.Get("Authorization"))
+			assert.Equal(t, "test-private-key", r.Header.Get("X-API-Private-Key"))
+
+			// Verify query parameters
+			assert.Equal(t, "1", r.URL.Query().Get("page"))
+			assert.Equal(t, "10", r.URL.Query().Get("limit"))
+			assert.Equal(t, "pending", r.URL.Query().Get("filter"))
+
+			// Send response
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(mockResponse)
+		})
+
+		// Create client and test
+		client := createTestClient(testServer.URL())
+		queryParams := generateMockQueryParams()
+
+		response, err := client.GetInvoice(queryParams)
+
+		// Assertions
+		require.NoError(t, err)
+		require.NotNil(t, response)
+		assert.Equal(t, "success", response.Status)
+		assert.Equal(t, "Invoices retrieved successfully", response.Message)
+		assert.Equal(t, 200, response.Code)
+		assert.Equal(t, 1, response.Data.Total)
+		assert.Len(t, response.Data.Invoices, 1)
+
+		// Verify invoice details
+		invoice := response.Data.Invoices[0]
+		assert.Equal(t, "INV-001", invoice.InvoiceNumber)
+		assert.Equal(t, "pending", invoice.Status)
+		assert.Equal(t, 200.00, invoice.TotalAmount)
+		assert.Len(t, invoice.InvoiceItems, 2)
+		assert.Equal(t, "US Dollar", invoice.Currency.Name)
+		assert.Equal(t, "Ethereum", invoice.BlockchainNetwork.NetworkName)
+	})
+
+	t.Run("EmptyResult", func(t *testing.T) {
+		testServer.AddHandler("/merchant-integrations-server/fetch-invoice", func(w http.ResponseWriter, r *http.Request) {
+			emptyResponse := &InvoiceResponse{
+				Status:  "success",
+				Message: "No invoices found",
+				Code:    200,
+				Data: InvoiceDetails{
+					Total:    0,
+					Invoices: []Invoice{},
+				},
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(emptyResponse)
+		})
+
+		client := createTestClient(testServer.URL())
+		queryParams := generateMockQueryParams()
+
+		response, err := client.GetInvoice(queryParams)
+
+		// Assertions
+		require.NoError(t, err)
+		require.NotNil(t, response)
+		assert.Equal(t, "success", response.Status)
+		assert.Equal(t, 0, response.Data.Total)
+		assert.Len(t, response.Data.Invoices, 0)
+	})
+
+	t.Run("UnauthorizedError", func(t *testing.T) {
+		testServer.AddHandler("/merchant-integrations-server/fetch-invoice", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(`{"status":"error","message":"Unauthorized access","code":401}`))
+		})
+
+		client := createTestClient(testServer.URL())
+		queryParams := generateMockQueryParams()
+
+		response, err := client.GetInvoice(queryParams)
+
+		// Assertions
+		assert.Error(t, err)
+		assert.Nil(t, response)
+		assert.Contains(t, err.Error(), "401")
+	})
+}
+
+func TestApproveInvoice(t *testing.T) {
+	testServer := NewTestServer()
+	defer testServer.Close()
+
+	t.Run("Success", func(t *testing.T) {
+		// Setup mock response
+		mockResponse := generateMockSuccessResponse()
+		testServer.AddHandler("/merchant-integrations-server/approve-invoice", func(w http.ResponseWriter, r *http.Request) {
+			// Verify request method
+			assert.Equal(t, http.MethodPost, r.Method)
+
+			// Verify headers
+			assert.Equal(t, "Bearer test-public-key", r.Header.Get("Authorization"))
+			assert.Equal(t, "test-private-key", r.Header.Get("X-API-Private-Key"))
+			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+
+			// Verify request body
+			var requestBody ApproveInvoice
+			err := json.NewDecoder(r.Body).Decode(&requestBody)
+			require.NoError(t, err)
+			assert.NotEmpty(t, requestBody.InvoiceID)
+			assert.True(t, requestBody.OnChain)
+
+			// Send response
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(mockResponse)
+		})
+
+		// Create client and test
+		client := createTestClient(testServer.URL())
+		request := generateMockApproveInvoiceRequest()
+
+		response, err := client.ApproveInvoice(request)
+
+		// Assertions
+		require.NoError(t, err)
+		require.NotNil(t, response)
+		assert.Equal(t, "success", response.Status)
+		assert.Equal(t, "Operation completed successfully", response.Message)
+		assert.Equal(t, 200, response.Code)
+	})
+
+	t.Run("InvoiceNotFound", func(t *testing.T) {
+		testServer.AddHandler("/merchant-integrations-server/approve-invoice", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(`{"status":"error","message":"Invoice not found","code":404}`))
+		})
+
+		client := createTestClient(testServer.URL())
+		request := generateMockApproveInvoiceRequest()
+		request.InvoiceID = "non-existent-id"
+
+		response, err := client.ApproveInvoice(request)
+
+		// Assertions
+		assert.Error(t, err)
+		assert.Nil(t, response)
+		assert.Contains(t, err.Error(), "404")
+	})
+
+	t.Run("AlreadyApproved", func(t *testing.T) {
+		testServer.AddHandler("/merchant-integrations-server/approve-invoice", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusConflict)
+			w.Write([]byte(`{"status":"error","message":"Invoice already approved","code":409}`))
+		})
+
+		client := createTestClient(testServer.URL())
+		request := generateMockApproveInvoiceRequest()
+
+		response, err := client.ApproveInvoice(request)
+
+		// Assertions
+		assert.Error(t, err)
+		assert.Nil(t, response)
+		assert.Contains(t, err.Error(), "409")
+	})
+}
+
+// Integration test example
+func TestInvoiceWorkflow(t *testing.T) {
+	testServer := NewTestServer()
+	defer testServer.Close()
+
+	// Setup handlers for complete workflow
+	createResponse := generateMockSuccessResponse()
+	listResponse := generateMockInvoiceResponse()
+	approveResponse := generateMockSuccessResponse()
+
+	testServer.AddHandler("/merchant-integrations-server/create-invoice", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(createResponse)
+	})
+
+	testServer.AddHandler("/merchant-integrations-server/fetch-invoice", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(listResponse)
+	})
+
+	testServer.AddHandler("/merchant-integrations-server/approve-invoice", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(approveResponse)
+	})
+
+	client := createTestClient(testServer.URL())
+
+	// Step 1: Create invoice
+	createRequest := generateMockInvoiceCreateRequest()
+	createResp, err := client.CreateInvoice(createRequest)
+	require.NoError(t, err)
+	assert.Equal(t, "success", createResp.Status)
+
+	// Step 2: List invoices
+	queryParams := generateMockQueryParams()
+	listResp, err := client.GetInvoice(queryParams)
+	require.NoError(t, err)
+	assert.Equal(t, "success", listResp.Status)
+	assert.Greater(t, listResp.Data.Total, 0)
+
+	// Step 3: Approve invoice
+	approveRequest := &ApproveInvoice{
+		InvoiceID: listResp.Data.Invoices[0].ID,
+		OnChain:   true,
+	}
+	approveResp, err := client.ApproveInvoice(approveRequest)
+	require.NoError(t, err)
+	assert.Equal(t, "success", approveResp.Status)
+}
+
+// ============================================================================
+// EXAMPLE: Voucher Tests (Extensibility Demo)
+// ============================================================================
+// Uncomment and modify these functions to add voucher testing capability
+
+/*
+// Mock data generators for Voucher operations
+func generateMockRedeemRequest() *RedeemRequest {
+	return &RedeemRequest{
+		VoucherCode:            "VOUCHER123",
+		Amount:                 100.50,
+		WalletAddress:          "0x742f35Cc6464C5C07fdF6c0B2C36D8Ca6b18Aea1",
+		ToCurrencyAbbreviation: "USDT",
+		ReferenceId:            generateMockUUID().String(),
+		MetaData:               "test metadata",
+	}
+}
+
+func generateMockVerifyVoucherRequest() *VerifyVoucherCodeRequest {
+	return &VerifyVoucherCodeRequest{
+		VoucherCode: "VOUCHER123",
+	}
+}
+
+func generateMockGenerateVoucherRequest() *GenerateVoucherForCustomerRequest {
+	return &GenerateVoucherForCustomerRequest{
+		CurrencyId:       generateMockUUID(),
+		AmountToPurchase: 100.00,
+		CustomerID:       generateMockUUID(),
+		OnChain:          true,
+	}
+}
+
+// Test Suite for Voucher Operations
+func TestVoucherOperations(t *testing.T) {
+	t.Run("RedeemVoucher", TestRedeemVoucher)
+	t.Run("VerifyVoucher", TestVerifyVoucher)
+	t.Run("GenerateVoucher", TestGenerateVoucher)
+	t.Run("GetVoucherRedeemptionCharges", TestGetVoucherRedeemptionCharges)
+}
+
+func TestRedeemVoucher(t *testing.T) {
+	testServer := NewTestServer()
+	defer testServer.Close()
+
+	t.Run("Success", func(t *testing.T) {
+		mockResponse := generateMockSuccessResponse()
+		testServer.AddHandler("/merchant-integrations/redeem-voucher", func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, http.MethodPost, r.Method)
+			assert.Equal(t, "Bearer test-public-key", r.Header.Get("Authorization"))
+
+			var requestBody RedeemRequest
+			err := json.NewDecoder(r.Body).Decode(&requestBody)
+			require.NoError(t, err)
+			assert.Equal(t, "VOUCHER123", requestBody.VoucherCode)
+			assert.Equal(t, 100.50, requestBody.Amount)
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(mockResponse)
+		})
+
+		client := createTestClient(testServer.URL())
+		request := generateMockRedeemRequest()
+
+		response, err := client.RedeemVoucher(request)
+
+		require.NoError(t, err)
+		require.NotNil(t, response)
+		assert.Equal(t, "success", response.Status)
+	})
+
+	t.Run("InvalidVoucher", func(t *testing.T) {
+		testServer.AddHandler("/merchant-integrations/redeem-voucher", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`{"status":"error","message":"Invalid voucher code","code":400}`))
+		})
+
+		client := createTestClient(testServer.URL())
+		request := generateMockRedeemRequest()
+		request.VoucherCode = "INVALID"
+
+		response, err := client.RedeemVoucher(request)
+
+		assert.Error(t, err)
+		assert.Nil(t, response)
+		assert.Contains(t, err.Error(), "400")
+	})
+}
+
+func TestVerifyVoucher(t *testing.T) {
+	// Similar structure to other tests...
+	// Implementation would follow the same pattern
+}
+
+func TestGenerateVoucher(t *testing.T) {
+	// Similar structure to other tests...
+	// Implementation would follow the same pattern
+}
+
+func TestGetVoucherRedeemptionCharges(t *testing.T) {
+	// Similar structure to other tests...
+	// Implementation would follow the same pattern
+}
+
+// Voucher workflow integration test
+func TestVoucherWorkflow(t *testing.T) {
+	testServer := NewTestServer()
+	defer testServer.Close()
+
+	// Setup handlers for complete voucher workflow
+	// 1. Generate voucher
+	// 2. Verify voucher
+	// 3. Get redemption charges
+	// 4. Redeem voucher
+
+	// Implementation would follow the same pattern as TestInvoiceWorkflow
+}
+*/

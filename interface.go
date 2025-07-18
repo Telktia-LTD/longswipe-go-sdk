@@ -1,4 +1,4 @@
-package utils
+package longswipe
 
 import (
 	"time"
@@ -232,4 +232,88 @@ type GenerateVoucherForCustomerRequest struct {
 	AmountToPurchase    float64   `json:"amountToPurchase" validate:"required"`
 	CustomerID          uuid.UUID `json:"customerId" validate:"required"`
 	OnChain             bool      `json:"onChain" validate:"omitempty"`
+}
+
+type InvoiceItemRequest struct {
+	Description string  `json:"description"`
+	Quantity    int     `json:"quantity"`
+	UnitPrice   float64 `json:"unitPrice"`
+}
+type CreateInvoiceRequest struct {
+	FullName                      string               `json:"fullName" validate:"required"`
+	Email                         string               `json:"email" validate:"email,required"`
+	MerchantCode                  string               `json:"merchantCode" validate:"required"`
+	InvoiceDate                   time.Time            `json:"invoiceDate" validate:"required"`
+	DueDate                       time.Time            `json:"dueDate" validate:"required"`
+	InvoiceItems                  []InvoiceItemRequest `json:"invoiceItems" validate:"required"`
+	CurrencyAbbreviation          string               `json:"currencyAbbreviation" validate:"required"`
+	BlockchainNetworkAbbreviation string               `json:"blockchainNetworkAbbreviation" validate:"omitempty"`
+}
+
+type InvoiceResponse = ApiResponse[InvoiceDetails]
+
+type InvoiceDetails struct {
+	Invoices []Invoice `json:"invoices"`
+	Total    int       `json:"total"`
+}
+
+type Invoice struct {
+	BlockchainNetwork BlockchainNetwork `json:"blockchainNetwork"`
+	CreatedAt         string            `json:"createdAt"`
+	Currency          Currency          `json:"currency"`
+	DueDate           string            `json:"dueDate"`
+	ID                string            `json:"id"`
+	InvoiceDate       string            `json:"invoiceDate"`
+	InvoiceItems      []InvoiceItem     `json:"invoiceItems"`
+	InvoiceNumber     string            `json:"invoiceNumber"`
+	MerchantUser      MerchantUser      `json:"merchantUser"`
+	Status            string            `json:"status"`
+	TotalAmount       float64           `json:"totalAmount"`
+	UpdatedAt         string            `json:"updatedAt"`
+	UserID            string            `json:"userId"`
+}
+
+type BlockchainNetwork struct {
+	BlockExplorerURL string `json:"blockExplorerUrl"`
+	ChainID          string `json:"chainID"`
+	ID               string `json:"id"`
+	NetworkName      string `json:"networkName"`
+}
+
+type Currency struct {
+	Abbrev       string `json:"abbrev"`
+	CurrencyType string `json:"currencyType"`
+	ID           string `json:"id"`
+	Image        string `json:"image"`
+	IsActive     bool   `json:"isActive"`
+	Name         string `json:"name"`
+	Symbol       string `json:"symbol"`
+}
+
+type InvoiceItem struct {
+	CreatedAt   string  `json:"createdAt"`
+	Description string  `json:"description"`
+	ID          string  `json:"id"`
+	Quantity    int     `json:"quantity"`
+	TotalPrice  float64 `json:"totalPrice"`
+	UnitPrice   float64 `json:"unitPrice"`
+	UpdatedAt   string  `json:"updatedAt"`
+}
+
+type MerchantUser struct {
+	Email string `json:"email"`
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+}
+
+type QueryParams struct {
+	Page   int    `json:"page,omitempty"`
+	Limit  int    `json:"limit,omitempty"`
+	Search string `json:"search,omitempty"`
+	Filter string `json:"filter,omitempty"`
+}
+
+type ApproveInvoice struct {
+	InvoiceID string `json:"invoiceId" validate:"required"`
+	OnChain   bool   `json:"onChain" validate:"omitempty"`
 }
