@@ -346,3 +346,117 @@ type MerchantUserResponse struct {
 	Status  string             `json:"status"`
 	Data    []MerchantUserData `json:"data"`
 }
+
+type PaymentRequest struct {
+	Amount         float64                `json:"amount"`
+	Currency       string                 `json:"currency"`
+	UserIdentifier string                 `json:"user_identifier"`
+	Metadata       map[string]interface{} `json:"metadata"`
+	ReferenceID    string                 `json:"reference_id"`
+}
+
+type AddressDepositRequest struct {
+	Amount                      float64                `json:"amount"`
+	BlockchainNetworkID         string                 `json:"blockchainNetworkId"`
+	CurrencyAbbreviation        string                 `json:"currency_abbreviation"`
+	Metadata                    map[string]interface{} `json:"metadata"`
+	PayWithCurrencyAbbreviation string                 `json:"pay_with_currency_abbreviation"`
+	ReferenceID                 string                 `json:"reference_id"`
+}
+
+type DepositResponse struct {
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+	Status  string `json:"status"`
+	Data    struct {
+		ID                      string  `json:"id"`
+		Address                 string  `json:"address"`
+		AmountToDeposit         float64 `json:"amountToDeposit"`
+		ExpiresAt               string  `json:"expiresAt"`   // ISO 8601 date string
+		DateCreated             string  `json:"dateCreated"` // ISO 8601 date string
+		BlockchainNetworkDetail struct {
+			ID               string `json:"id"`
+			NetworkName      string `json:"networkName"`
+			ChainID          string `json:"chainID"`
+			BlockExplorerURL string `json:"blockExplorerUrl"`
+			NetworkType      string `json:"networkType"`
+			NetworkLogo      string `json:"networkLogo"`
+		} `json:"blockchainNetworkDetail"`
+	} `json:"data"`
+}
+
+type AddressDepositChargeRequest struct {
+	Amount                      float64 `json:"amount"`
+	BlockchainNetworkID         string  `json:"blockchainNetworkId"`
+	CurrencyAbbreviation        string  `json:"currency_abbreviation"`
+	PayWithCurrencyAbbreviation string  `json:"pay_with_currency_abbreviation"`
+}
+
+type ChargeEstimateResponse struct {
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+	Status  string `json:"status"`
+	Data    struct {
+		SwapAmount                             float64        `json:"swapAmount"`
+		ToAmount                               float64        `json:"toAmount"`
+		ProcessingFee                          float64        `json:"processingFee"`
+		TotalGasAndProcessingFeeInFromCurrency float64        `json:"totalGasAndProceesingFeeInFromCurrency"`
+		TotalGasCostAndProcessingFeeInWei      float64        `json:"totalGasCostAndProcessingFeeInWei"`
+		ExchangeRate                           float64        `json:"exchangeRate"`
+		PercentageCharge                       float64        `json:"percentageCharge"`
+		IsPercentageCharge                     bool           `json:"isPercentageCharge"`
+		ToCurrency                             CurrencyDetail `json:"toCurrency"`
+		FromCurrency                           CurrencyDetail `json:"fromCurrency"`
+		TotalDeductable                        float64        `json:"totalDeductable"`
+	} `json:"data"`
+}
+
+type CurrencyDetail struct {
+	ID           string `json:"id"`
+	Image        string `json:"image"`
+	Name         string `json:"name"`
+	Symbol       string `json:"symbol"`
+	Abbreviation string `json:"Abbreviation"`
+	CurrencyType string `json:"currencyType"`
+	IsActive     bool   `json:"isActive"`
+	CreatedAt    string `json:"createdAt"`
+}
+
+type TransactionResponse struct {
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+	Status  string `json:"status"`
+	Data    struct {
+		ID              string         `json:"id"`
+		UserID          *string        `json:"userId"` // Use pointer to handle string or null
+		ReferenceID     string         `json:"referenceId"`
+		Amount          float64        `json:"amount"`
+		Title           string         `json:"title"`
+		Message         string         `json:"message"`
+		ChargedAmount   float64        `json:"chargedAmount"`
+		ChargeType      string         `json:"chargeType"`
+		Type            string         `json:"type"`
+		Status          string         `json:"status"`
+		Currency        CurrencyDetail `json:"currency"`
+		CreatedAt       string         `json:"createdAt"` // ISO 8601 date string
+		UpdatedAt       string         `json:"updatedAt"` // ISO 8601 date string
+		TransactionHash string         `json:"transactionHash"`
+		ApplicationName string         `json:"applicationName"`
+		ReferenceHash   string         `json:"referenceHash"`
+		MetaData        string         `json:"metaData"`
+	} `json:"data"`
+}
+
+type ConfirmUserDetails struct {
+	Fullname string `json:"fullName" validate:"required"`
+	Email    string `json:"email" validate:"email,required"`
+	Phone    string `json:"phone" validate:"required"`
+	Avatar   string `json:"avatar" validate:"omitempty,url"`
+}
+
+type ConfirmUserDetailsResponse struct {
+	Message string             `json:"message"`
+	Code    int                `json:"code"`
+	Status  string             `json:"status"`
+	Data    ConfirmUserDetails `json:"data"`
+}
