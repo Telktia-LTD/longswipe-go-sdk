@@ -1,12 +1,10 @@
 package longswipe
 
-import "github.com/Telktia-LTD/longswipe-go-sdk/utils"
-
-func (c *Client) GetVoucherRedeemptionCharges(body *utils.RedeemRequest) (*utils.RedeemeVoucherDetailsResponse, error) {
+func (c *Client) GetVoucherRedeemptionCharges(body *RedeemRequest) (*RedeemeVoucherDetailsResponse, error) {
 	endpoint := "/merchant-integrations/fetch-voucher-redemption-charges"
-	var charges utils.RedeemeVoucherDetailsResponse
+	var charges RedeemeVoucherDetailsResponse
 	err := c.doRequestAndUnmarshal(
-		utils.POST,
+		POST,
 		endpoint,
 		body,
 		&charges,
@@ -18,12 +16,12 @@ func (c *Client) GetVoucherRedeemptionCharges(body *utils.RedeemRequest) (*utils
 	return &charges, nil
 }
 
-func (c *Client) VerifyVoucher(body *utils.VerifyVoucherCodeRequest) (*utils.VerifyVoucherResponse, error) {
-	var verifyVoucher utils.VerifyVoucherResponse
+func (c *Client) VerifyVoucher(body *VerifyVoucherCodeRequest) (*VerifyVoucherResponse, error) {
+	var verifyVoucher VerifyVoucherResponse
 
 	endpoint := "/merchant-integrations/verify-voucher"
 	err := c.doRequestAndUnmarshal(
-		utils.POST,
+		POST,
 		endpoint,
 		body,
 		&verifyVoucher,
@@ -35,12 +33,12 @@ func (c *Client) VerifyVoucher(body *utils.VerifyVoucherCodeRequest) (*utils.Ver
 	return &verifyVoucher, nil
 }
 
-func (c *Client) RedeemVoucher(body *utils.RedeemRequest) (*utils.SuccessResponse, error) {
+func (c *Client) RedeemVoucher(body *RedeemRequest) (*SuccessResponse, error) {
 	endpoint := "/merchant-integrations/redeem-voucher"
-	var redeemVoucher utils.SuccessResponse
+	var redeemVoucher SuccessResponse
 
 	err := c.doRequestAndUnmarshal(
-		utils.POST,
+		POST,
 		endpoint,
 		body,
 		&redeemVoucher,
@@ -50,21 +48,4 @@ func (c *Client) RedeemVoucher(body *utils.RedeemRequest) (*utils.SuccessRespons
 		return nil, err
 	}
 	return &redeemVoucher, nil
-}
-
-func (c *Client) GenerateVoucher(body *utils.GenerateVoucherForCustomerRequest) (*utils.SuccessResponse, error) {
-	endpoint := "/merchant-integrations-server/generate-voucher-for-customer"
-	var res utils.SuccessResponse
-
-	err := c.doRequestAndUnmarshal(
-		utils.POST,
-		endpoint,
-		body,
-		&res,
-	)
-
-	if err != nil {
-		return nil, err
-	}
-	return &res, nil
 }

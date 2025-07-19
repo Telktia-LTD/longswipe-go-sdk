@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-type ClientConfig struct {
+type LongSwipeConfig struct {
 	BaseURL    string
 	PublicKey  string
 	PrivateKey string
@@ -24,7 +24,7 @@ type Client struct {
 	httpClient *http.Client
 }
 
-func NewClient(config ClientConfig) *Client {
+func NewClient(config LongSwipeConfig) *Client {
 	if config.Timeout == 0 {
 		config.Timeout = 10 * time.Second
 	}
@@ -53,6 +53,8 @@ func (c *Client) doRequest(method, path string, body interface{}) (*http.Respons
 		}
 		bodyReader = bytes.NewReader(jsonBody)
 	}
+
+	fmt.Println("Request URL:", c.baseURL+path)
 
 	req, err := http.NewRequest(method, c.baseURL+path, bodyReader)
 	if err != nil {
