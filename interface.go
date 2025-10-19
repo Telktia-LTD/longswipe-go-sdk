@@ -469,7 +469,6 @@ type CustomerPayout struct {
 	FromCurrencyAbbreviation string  `json:"fromCurrencyAbbreviation" validate:"omitempty"`
 	ToCurrencyAbbreviation   string  `json:"toCurrencyAbbreviation" validate:"omitempty"`
 	ReferenceId              string  `json:"referenceId" validate:"omitempty"`
-	CustomerId               string  `json:"customerId" validate:"required,uuid"`
 	LongswipeUsernameOrEmail string  `json:"longswipeUsernameOrEmail" validate:"omitempty"`
 }
 
