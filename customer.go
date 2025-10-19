@@ -103,3 +103,37 @@ func (c *Client) DeleteCustomer(customerID uuid.UUID) (*SuccessResponse, error) 
 	}
 	return &res, nil
 }
+
+func (c *Client) PayoutToCustomer(body *CustomerPayout) (*SuccessResponse, error) {
+	endpoint := "/merchant-integrations-server/payout"
+	var res SuccessResponse
+
+	err := c.doRequestAndUnmarshal(
+		POST,
+		endpoint,
+		body,
+		&res,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (c *Client) GetCustomerTransactions(customerID string, page, limit, status string) (*TransactionListResponse, error) {
+	endpoint := fmt.Sprintf("/merchant-integrations-server/fetch-customer-transactions/%s?page=%s&limit=%s&status=%s", customerID, page, limit, status)
+	var transactions TransactionListResponse
+
+	err := c.doRequestAndUnmarshal(
+		GET,
+		endpoint,
+		nil,
+		&transactions,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	return &transactions, nil
+}

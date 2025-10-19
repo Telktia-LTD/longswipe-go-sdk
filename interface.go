@@ -9,6 +9,8 @@ import (
 type UserRoles string
 type NetworkType string
 type MERCHANTROLES string
+type TransactionType string
+type TransactionStatus string
 
 type SuccessResponse struct {
 	Status  string `json:"status"`
@@ -459,4 +461,48 @@ type ConfirmUserDetailsResponse struct {
 	Code    int                `json:"code"`
 	Status  string             `json:"status"`
 	Data    ConfirmUserDetails `json:"data"`
+}
+
+type CustomerPayout struct {
+	Amount                   float64 `json:"amount" validate:"required"`
+	MetaData                 string  `json:"metaData" validate:"omitempty"`
+	FromCurrencyAbbreviation string  `json:"fromCurrencyAbbreviation" validate:"omitempty"`
+	ToCurrencyAbbreviation   string  `json:"toCurrencyAbbreviation" validate:"omitempty"`
+	ReferenceId              string  `json:"referenceId" validate:"omitempty"`
+	LongswipeUsernameOrEmail string  `json:"longswipeUsernameOrEmail" validate:"omitempty"`
+}
+
+type Transactions struct {
+	ID              uuid.UUID         `json:"id"`
+	UserID          *uuid.UUID        `json:"userId"`
+	ReferenceID     string            `json:"referenceId"`
+	Amount          float64           `json:"amount"`
+	Title           string            `json:"title"`
+	Message         string            `json:"message"`
+	ChargedAmount   float64           `json:"chargedAmount"`
+	ChargeType      TransactionType   `json:"chargeType"`
+	Type            TransactionType   `json:"type"`
+	Status          TransactionStatus `json:"status"`
+	Currency        CurrencyDetails   `json:"currency"`
+	CreatedAt       time.Time         `json:"createdAt"`
+	UpdatedAt       time.Time         `json:"updatedAt"`
+	TransactionHash string            `json:"transactionHash"`
+	ApplicationName string            `json:"applicationName"`
+	ReferenceHash   string            `json:"referenceHash"`
+	MetaData        string            `json:"metaData"`
+}
+type PaginationInfo struct {
+	Page       int `json:"page"`
+	Limit      int `json:"limit"`
+	TotalItems int `json:"totalItems"`
+	TotalPages int `json:"totalPages"`
+}
+type TransactionListResponse struct {
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+	Status  string `json:"status"`
+	Data    struct {
+		Transactions []Transactions `json:"transactions"`
+		Pagination   PaginationInfo `json:"pagination"`
+	} `json:"data"`
 }
