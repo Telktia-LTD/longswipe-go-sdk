@@ -105,7 +105,7 @@ func (c *Client) DeleteCustomer(customerID uuid.UUID) (*SuccessResponse, error) 
 }
 
 func (c *Client) PayoutToCustomer(body *CustomerPayout) (*SuccessResponse, error) {
-	endpoint := "/merchant-integrations-server/customer-payout"
+	endpoint := "/merchant-integrations-server/payout"
 	var res SuccessResponse
 
 	err := c.doRequestAndUnmarshal(
