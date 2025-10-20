@@ -86,3 +86,20 @@ func (c *Client) ConfirmUser(identifier string) (*ConfirmUserDetailsResponse, er
 	}
 	return &userProfile, nil
 }
+
+func (c *Client) PayoutToLongSwipeUser(body *CustomerPayout) (*SuccessResponse, error) {
+	endpoint := "/merchant-integrations-server/payout"
+	var res SuccessResponse
+
+	err := c.doRequestAndUnmarshal(
+		POST,
+		endpoint,
+		body,
+		&res,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
