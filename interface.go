@@ -464,12 +464,13 @@ type ConfirmUserDetailsResponse struct {
 }
 
 type CustomerPayout struct {
-	Amount                   float64 `json:"amount" validate:"required"`
-	MetaData                 string  `json:"metaData" validate:"omitempty"`
-	FromCurrencyAbbreviation string  `json:"fromCurrencyAbbreviation" validate:"omitempty"`
-	ToCurrencyAbbreviation   string  `json:"toCurrencyAbbreviation" validate:"omitempty"`
-	ReferenceId              string  `json:"referenceId" validate:"omitempty"`
-	LongswipeUsernameOrEmail string  `json:"longswipeUsernameOrEmail" validate:"omitempty"`
+	Amount                        float64 `json:"amount" validate:"required"`
+	MetaData                      string  `json:"metaData" validate:"omitempty"`
+	FromCurrencyAbbreviation      string  `json:"fromCurrencyAbbreviation" validate:"omitempty"`
+	ToCurrencyAbbreviation        string  `json:"toCurrencyAbbreviation" validate:"omitempty"`
+	ReferenceId                   string  `json:"referenceId" validate:"omitempty"`
+	LongswipeUsernameOrEmail      string  `json:"longswipeUsernameOrEmail" validate:"omitempty"`
+	BlockchainNetworkAbbreviation string  `json:"blockchainNetworkAbbreviation" validate:"omitempty"`
 }
 
 type Transactions struct {
