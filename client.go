@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-type LongSwipeConfig struct {
+type ClientConfig struct {
 	BaseURL    string
 	PublicKey  string
 	PrivateKey string
@@ -24,7 +24,7 @@ type Client struct {
 	httpClient *http.Client
 }
 
-func NewClient(config LongSwipeConfig) *Client {
+func NewClient(config ClientConfig) *Client {
 	if config.Timeout == 0 {
 		config.Timeout = 10 * time.Second
 	}
