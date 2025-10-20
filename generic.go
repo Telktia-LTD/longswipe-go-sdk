@@ -4,7 +4,7 @@ func (c *Client) GetAllNetwork() (*CryptoNetworkResponse, error) {
 	endpoint := "/merchant-integrations/fetch-supported-cryptonetworks"
 	var networks CryptoNetworkResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		GET,
 		endpoint,
 		nil,
@@ -20,7 +20,7 @@ func (c *Client) GetAllNetwork() (*CryptoNetworkResponse, error) {
 func (c *Client) GetAllCurrency() (*FetchCurrenciesResponse, error) {
 	endpoint := "/merchant-integrations/fetch-supported-currencies"
 	var currencies FetchCurrenciesResponse
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		GET,
 		endpoint,
 		nil,

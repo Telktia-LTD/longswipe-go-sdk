@@ -3,7 +3,7 @@ package longswipe
 func (c *Client) GetVoucherRedeemptionCharges(body *RedeemRequest) (*RedeemeVoucherDetailsResponse, error) {
 	endpoint := "/merchant-integrations/fetch-voucher-redemption-charges"
 	var charges RedeemeVoucherDetailsResponse
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		POST,
 		endpoint,
 		body,
@@ -20,7 +20,7 @@ func (c *Client) VerifyVoucher(body *VerifyVoucherCodeRequest) (*VerifyVoucherRe
 	var verifyVoucher VerifyVoucherResponse
 
 	endpoint := "/merchant-integrations/verify-voucher"
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		POST,
 		endpoint,
 		body,
@@ -37,7 +37,7 @@ func (c *Client) RedeemVoucher(body *RedeemRequest) (*SuccessResponse, error) {
 	endpoint := "/merchant-integrations/redeem-voucher"
 	var redeemVoucher SuccessResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		POST,
 		endpoint,
 		body,

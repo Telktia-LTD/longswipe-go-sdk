@@ -6,7 +6,7 @@ func (c *Client) PaymentRequest(body *PaymentRequest) (*SuccessResponse, error) 
 	endpoint := "/merchant-integrations/payment-request"
 	var res SuccessResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		POST,
 		endpoint,
 		body,
@@ -23,7 +23,7 @@ func (c *Client) AddressDepositRequest(body *AddressDepositRequest) (*DepositRes
 	endpoint := "/merchant-integrations/deposit-address-payment-request"
 	var res DepositResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		POST,
 		endpoint,
 		body,
@@ -40,7 +40,7 @@ func (c *Client) DepositCharges(body *AddressDepositChargeRequest) (*ChargeEstim
 	endpoint := "/merchant-integrations/request-wallet-deposit-charges"
 	var charges ChargeEstimateResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		POST,
 		endpoint,
 		body,
@@ -57,7 +57,7 @@ func (c *Client) VerifyTransaction(referenceId string) (*TransactionResponse, er
 	endpoint := fmt.Sprintf("/merchant-integrations-server/verify-transaction/%s", referenceId)
 	var transaction TransactionResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		GET,
 		endpoint,
 		nil,
@@ -74,7 +74,7 @@ func (c *Client) ConfirmUser(identifier string) (*ConfirmUserDetailsResponse, er
 	endpoint := fmt.Sprintf("/merchant-integrations/confirm-user/%s", identifier)
 	var userProfile ConfirmUserDetailsResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		GET,
 		endpoint,
 		nil,
@@ -91,7 +91,7 @@ func (c *Client) PayoutToLongSwipeUser(body *CustomerPayout) (*SuccessResponse, 
 	endpoint := "/merchant-integrations-server/payout"
 	var res SuccessResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		POST,
 		endpoint,
 		body,

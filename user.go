@@ -4,7 +4,7 @@ func (c *Client) AddUser(body *AddNewUserRequest) (*SuccessResponse, error) {
 	endpoint := "/merchant-integrations-server/add-new-user"
 	var res SuccessResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		POST,
 		endpoint,
 		body,
@@ -21,7 +21,7 @@ func (c *Client) GetAllUser() (*MerchantUserResponse, error) {
 	endpoint := "/merchant-integrations-server/fetch-merchant-users"
 	var user MerchantUserResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		GET,
 		endpoint,
 		nil,

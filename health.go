@@ -9,7 +9,7 @@ type HealthCheckResponse struct {
 func (c *Client) HealthCheck() (*HealthCheckResponse, error) {
 	var response HealthCheckResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		GET,
 		"/merchant-integrations-server/health",
 		nil,

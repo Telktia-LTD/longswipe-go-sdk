@@ -10,7 +10,7 @@ func (c *Client) FetchInvoice(body *Pagination) (*MerchantInvoiceResponse, error
 	endpoint := buildInvoiceEndpoint(body.Page, body.Limit, body.Search)
 	var invoice MerchantInvoiceResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		GET,
 		endpoint,
 		nil,
@@ -37,7 +37,7 @@ func (c *Client) GetAllInvoiceCurrency() (*FetchAllAllowedInvoiceCurrencyRespons
 
 	var allowedCurrency FetchAllAllowedInvoiceCurrencyResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		GET,
 		endpoint,
 		nil,
@@ -53,7 +53,7 @@ func (c *Client) GetAllInvoiceCurrency() (*FetchAllAllowedInvoiceCurrencyRespons
 func (c *Client) CreateInvoice(body *CreateInvoiceRequest) (*SuccessResponse, error) {
 	endpoint := "/merchant-integrations-server/create-invoice"
 	var res SuccessResponse
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		POST,
 		endpoint,
 		body,
@@ -70,7 +70,7 @@ func (c *Client) ApproveInvoice(body *ApproveInvoiceRequest) (*SuccessResponse, 
 	endpoint := "/merchant-integrations-server/approve-invoice"
 	var res SuccessResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		POST,
 		endpoint,
 		body,

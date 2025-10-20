@@ -12,7 +12,7 @@ func (c *Client) GetCustomers(body *Pagination) (*CustomersResponse, error) {
 	endpoint := buildCustomerEndpoint(body.Page, body.Limit, body.Search)
 	var customers CustomersResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		GET,
 		endpoint,
 		nil,
@@ -40,7 +40,7 @@ func (c *Client) GetCustomer(email string) (*CustomerResponse, error) {
 
 	var customer CustomerResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		GET,
 		endpoint,
 		nil,
@@ -57,7 +57,7 @@ func (c *Client) AddCustomer(body *AddNewCustomer) (*SuccessResponse, error) {
 	endpoint := "/merchant-integrations-server/add-new-customer"
 	var res SuccessResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		POST,
 		endpoint,
 		body,
@@ -74,7 +74,7 @@ func (c *Client) UpdateCustomer(body *UpdatCustomer) (*SuccessResponse, error) {
 	endpoint := "/merchant-integrations-server/update-customer"
 	var res SuccessResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		PATCH,
 		endpoint,
 		body,
@@ -91,7 +91,7 @@ func (c *Client) DeleteCustomer(customerID uuid.UUID) (*SuccessResponse, error) 
 	endpoint := fmt.Sprintf("/merchant-integrations-server/delete-customer/%s", customerID)
 	var res SuccessResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		DELETE,
 		endpoint,
 		nil,
@@ -108,7 +108,7 @@ func (c *Client) GetCustomerTransactions(customerID string, page, limit, status 
 	endpoint := fmt.Sprintf("/merchant-integrations-server/fetch-customer-transactions/%s?page=%s&limit=%s&status=%s", customerID, page, limit, status)
 	var transactions TransactionListResponse
 
-	err := c.doRequestAndUnmarshal(
+	_, err := c.doRequestAndUnmarshal(
 		GET,
 		endpoint,
 		nil,
