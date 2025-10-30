@@ -464,12 +464,13 @@ type ConfirmUserDetailsResponse struct {
 }
 
 type CustomerPayout struct {
-	Amount                   float64 `json:"amount" validate:"required"`
-	MetaData                 string  `json:"metaData" validate:"omitempty"`
-	FromCurrencyAbbreviation string  `json:"fromCurrencyAbbreviation" validate:"omitempty"`
-	ToCurrencyAbbreviation   string  `json:"toCurrencyAbbreviation" validate:"omitempty"`
-	ReferenceId              string  `json:"referenceId" validate:"omitempty"`
-	LongswipeUsernameOrEmail string  `json:"longswipeUsernameOrEmail" validate:"omitempty"`
+	Amount                        float64 `json:"amount" validate:"required"`
+	MetaData                      string  `json:"metaData" validate:"omitempty"`
+	FromCurrencyAbbreviation      string  `json:"fromCurrencyAbbreviation" validate:"omitempty"`
+	ToCurrencyAbbreviation        string  `json:"toCurrencyAbbreviation" validate:"omitempty"`
+	ReferenceId                   string  `json:"referenceId" validate:"omitempty"`
+	LongswipeUsernameOrEmail      string  `json:"longswipeUsernameOrEmail" validate:"omitempty"`
+	BlockchainNetworkAbbreviation string  `json:"blockchainNetworkAbbreviation" validate:"omitempty"`
 }
 
 type Transactions struct {
@@ -505,4 +506,25 @@ type TransactionListResponse struct {
 		Transactions []Transactions `json:"transactions"`
 		Pagination   PaginationInfo `json:"pagination"`
 	} `json:"data"`
+}
+
+type MerchantBalanceDetails struct {
+	Merchant PublicMerchantResponse `json:"merchant"`
+	Balance  float64                `json:"balance"`
+	Currency CurrencyDetails        `json:"currency"`
+}
+
+type PublicBalanceResponse struct {
+	Message string                 `json:"message"`
+	Code    int                    `json:"code"`
+	Status  string                 `json:"status"`
+	Data    MerchantBalanceDetails `json:"data"`
+}
+
+type PublicMerchantResponse struct {
+	CompanyName         string `json:"companyName"`
+	TradingName         string `json:"tradingName"`
+	MerchantDescription string `json:"merchantDescription"`
+	MerchantCode        string `json:"merchantCode"`
+	Avatar              string `json:"avatar"`
 }
