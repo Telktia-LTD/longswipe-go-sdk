@@ -15,14 +15,14 @@ func main() {
 		Timeout:    30 * time.Second,
 	})
 
-	res, err := client.UserAccountBalance("johndoe@gmail.com", "USDT")
+	res, err := client.AccountBalance("USDT")
 	if err != nil {
 		fmt.Println("Error:", err.Error())
 		return
 	}
 
 	fmt.Println("Payout Response:", res.Message)
-	fmt.Println("User:", res.Data.User)
+	fmt.Println("Merchant:", res.Data.Merchant)
 	fmt.Println("Balance:", res.Data.Balance)
 	fmt.Println("Currency:", res.Data.Currency)
 

@@ -508,15 +508,23 @@ type TransactionListResponse struct {
 	} `json:"data"`
 }
 
-type UserBalanceDetails struct {
-	User     ConfirmUserDetails `json:"user"`
-	Balance  float64            `json:"balance"`
-	Currency CurrencyDetails    `json:"currency"`
+type MerchantBalanceDetails struct {
+	Merchant PublicMerchantResponse `json:"merchant"`
+	Balance  float64                `json:"balance"`
+	Currency CurrencyDetails        `json:"currency"`
 }
 
-type UserBalanceResponse struct {
-	Message string             `json:"message"`
-	Code    int                `json:"code"`
-	Status  string             `json:"status"`
-	Data    UserBalanceDetails `json:"data"`
+type PublicBalanceResponse struct {
+	Message string                 `json:"message"`
+	Code    int                    `json:"code"`
+	Status  string                 `json:"status"`
+	Data    MerchantBalanceDetails `json:"data"`
+}
+
+type PublicMerchantResponse struct {
+	CompanyName         string `json:"companyName"`
+	TradingName         string `json:"tradingName"`
+	MerchantDescription string `json:"merchantDescription"`
+	MerchantCode        string `json:"merchantCode"`
+	Avatar              string `json:"avatar"`
 }
