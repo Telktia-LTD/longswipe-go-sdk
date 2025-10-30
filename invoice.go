@@ -1,7 +1,6 @@
 package longswipe
 
 import (
-	"fmt"
 	"net/url"
 	"strconv"
 )
@@ -33,7 +32,7 @@ func buildInvoiceEndpoint(page int, limit int, filter string) string {
 }
 
 func (c *Client) GetAllInvoiceCurrency() (*FetchAllAllowedInvoiceCurrencyResponse, error) {
-	endpoint := fmt.Sprintf("/merchant-integrations-server/fetch-all-allowed-invoice-Currency")
+	endpoint := "/merchant-integrations-server/fetch-all-allowed-invoice-Currency"
 
 	var allowedCurrency FetchAllAllowedInvoiceCurrencyResponse
 
@@ -49,7 +48,6 @@ func (c *Client) GetAllInvoiceCurrency() (*FetchAllAllowedInvoiceCurrencyRespons
 	}
 	return &allowedCurrency, nil
 }
-
 func (c *Client) CreateInvoice(body *CreateInvoiceRequest) (*SuccessResponse, error) {
 	endpoint := "/merchant-integrations-server/create-invoice"
 	var res SuccessResponse
