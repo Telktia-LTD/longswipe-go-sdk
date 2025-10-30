@@ -21,10 +21,6 @@ func main() {
 		return
 	}
 
-	fmt.Println("Payout Response:", res.Message)
-	fmt.Println("Merchant:", res.Data.Merchant)
-	fmt.Println("Balance:", res.Data.Balance)
-	fmt.Println("Currency:", res.Data.Currency)
-
+	fmt.Println("Account Balance Response:", res)
 	// Use response
 }

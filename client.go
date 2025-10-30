@@ -57,8 +57,6 @@ func (c *Client) doRequest(method, path string, body interface{}) (int, []byte, 
 		bodyReader = bytes.NewReader(jsonBody)
 	}
 
-	fmt.Println("Request URL:", c.baseURL+path)
-
 	req, err := http.NewRequest(method, c.baseURL+path, bodyReader)
 	if err != nil {
 		return 0, nil, fmt.Errorf("failed to create request: %w", err)
