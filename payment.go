@@ -103,3 +103,20 @@ func (c *Client) PayoutToLongSwipeUser(body *CustomerPayout) (*SuccessResponse, 
 	}
 	return &res, nil
 }
+
+func (c *Client) UserAccountBalance(identifier, currencyAbbreviation string) (*UserBalanceResponse, error) {
+	endpoint := fmt.Sprintf("/merchant-integrations/fetch-user-balance?emailOrUsername=%s&currencyAbbreviation=%s", identifier, currencyAbbreviation)
+	var balance UserBalanceResponse
+
+	_, err := c.doRequestAndUnmarshal(
+		GET,
+		endpoint,
+		nil,
+		&balance,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	return &balance, nil
+}

@@ -15,22 +15,16 @@ func main() {
 		Timeout:    30 * time.Second,
 	})
 
-	res, err := client.PayoutToLongSwipeUser(&longswipe.CustomerPayout{
-		Amount:                        5,
-		MetaData:                      "{\"order_id\":\"6735\"}",
-		ToCurrencyAbbreviation:        "USDT",
-		FromCurrencyAbbreviation:      "USDT",
-		LongswipeUsernameOrEmail:      "festechdev@gmail.com",
-		ReferenceId:                   "payout-ref-" + time.Now().Format("20060102150405"),
-		BlockchainNetworkAbbreviation: "ETH",
-	})
-
+	res, err := client.UserAccountBalance("johndoe@gmail.com", "USDT")
 	if err != nil {
 		fmt.Println("Error:", err.Error())
 		return
 	}
 
 	fmt.Println("Payout Response:", res.Message)
+	fmt.Println("User:", res.Data.User)
+	fmt.Println("Balance:", res.Data.Balance)
+	fmt.Println("Currency:", res.Data.Currency)
 
 	// Use response
 }

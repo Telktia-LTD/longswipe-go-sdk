@@ -507,3 +507,16 @@ type TransactionListResponse struct {
 		Pagination   PaginationInfo `json:"pagination"`
 	} `json:"data"`
 }
+
+type UserBalanceDetails struct {
+	User     ConfirmUserDetails `json:"user"`
+	Balance  float64            `json:"balance"`
+	Currency CurrencyDetails    `json:"currency"`
+}
+
+type UserBalanceResponse struct {
+	Message string             `json:"message"`
+	Code    int                `json:"code"`
+	Status  string             `json:"status"`
+	Data    UserBalanceDetails `json:"data"`
+}
