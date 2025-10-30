@@ -76,7 +76,7 @@ import (
 
 func main() {
 	client := longswipe.NewClient(longswipe.ClientConfig{
-		BaseURL:    utils.PRODUCTION, // utils.SANDBOX
+		BaseURL:    utils.PRODUCTION, // or utils.SANDBOX (if test environment)
 		PublicKey:  "YOUR_PUBLIC_API_KEY",
 		Timeout:    5 * time.Second,
 		PrivateKey: "YOUR_SECRET_API_KEY",
