@@ -7,4 +7,9 @@ const (
 	POST       = "POST"
 	PATCH      = "PATCH"
 	DELETE     = "DELETE"
+	CANCELLED  = "CANCELLED"
+	COMPLETED  = "COMPLETED"
+	PENDING    = "PENDING"
+	FAILED     = "FAILED"
+	APPROVED   = "APPROVED"
 )
