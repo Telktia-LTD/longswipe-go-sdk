@@ -26,13 +26,13 @@ type ApiResponse[T any] struct {
 }
 
 type RedeemRequest struct {
-	VoucherCode            string            `json:"voucherCode" validate:"required"`
-	Amount                 float64           `json:"amount" validate:"required"`
-	LockPin                string            `json:"lockPin" validate:"omitempty"`
-	WalletAddress          string            `json:"walletAddress" validate:"omitempty"`
-	ToCurrencyAbbreviation string            `json:"toCurrencyAbbreviation" validate:"omitempty"`
-	ReferenceId            string            `json:"referenceId" validate:"omitempty"`
-	MetaData               map[string]string `json:"metaData" validate:"omitempty"`
+	VoucherCode            string  `json:"voucherCode" validate:"required"`
+	Amount                 float64 `json:"amount" validate:"required"`
+	LockPin                string  `json:"lockPin" validate:"omitempty"`
+	WalletAddress          string  `json:"walletAddress" validate:"omitempty"`
+	ToCurrencyAbbreviation string  `json:"toCurrencyAbbreviation" validate:"omitempty"`
+	ReferenceId            string  `json:"referenceId" validate:"omitempty"`
+	MetaData               string  `json:"metaData" validate:"omitempty"`
 }
 
 type UserResponse struct {
@@ -527,4 +527,233 @@ type PublicMerchantResponse struct {
 	MerchantDescription string `json:"merchantDescription"`
 	MerchantCode        string `json:"merchantCode"`
 	Avatar              string `json:"avatar"`
+}
+
+type EscrowPublicRequest struct {
+	Amount                    float64 `json:"amount" validate:"required,gt=0"`
+	CurrencyAbbreviation      string  `json:"currency_abbreviation" validate:"required"`
+	ApproverEmail             string  `json:"approver_email" validate:"required,email"`
+	ApproverAuthorizationCode string  `json:"approver_authorization_code" validate:"required"`
+}
+
+type EscrowInitialDetails struct {
+	EscrowId string `json:"escrow_id"`
+}
+
+type EscrowInitialResponse struct {
+	Status  string               `json:"status"`
+	Message string               `json:"message"`
+	Code    int                  `json:"code"`
+	Data    EscrowInitialDetails `json:"data"`
+}
+
+type UpdateEscrowStatusRequest struct {
+	Status   string `json:"status" validate:"required,oneof=COMPLETED CANCELLED FAILED APPROVED"`
+	EscrowId string `json:"escrow_id" validate:"required"`
+}
+
+type AllEscrowDetail struct {
+	EscrowId   string            `json:"escrow_id"`
+	Amount     float64           `json:"amount"`
+	Balance    float64           `json:"balance"`
+	Currency   CurrencyDetails   `json:"currency"`
+	Status     TransactionStatus `json:"status"`
+	IsReleased bool              `json:"is_released"`
+	CreatedAt  time.Time         `json:"created_at"`
+	UpdatedAt  time.Time         `json:"updated_at"`
+}
+
+type AllEscrowResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+	Data    struct {
+		Escrows    []AllEscrowDetail `json:"escrows"`
+		Pagination PaginationInfo    `json:"pagination_info"`
+	} `json:"data"`
+}
+
+type EscrowDetailResponse struct {
+	Status  string       `json:"status"`
+	Message string       `json:"message"`
+	Code    int          `json:"code"`
+	Data    EscrowDetail `json:"data"`
+}
+
+type EscrowDetail struct {
+	EscrowId        string               `json:"escrow_id"`
+	Amount          float64              `json:"amount"`
+	Status          TransactionStatus    `json:"status"`
+	Balance         float64              `json:"balance"`
+	IsReleased      bool                 `json:"is_released"`
+	ApplicationName string               `json:"application_name"`
+	CreatedAt       time.Time            `json:"created_at"`
+	UpdatedAt       time.Time            `json:"updated_at"`
+	Recipients      []RecipientDetail    `json:"recipients"`
+	Approver        RoleDetail           `json:"approver"`
+	Transactions    []EscrowTransactions `json:"transactions"`
+	FundRelease     []FundReleaseDetail  `json:"fund_release"`
+}
+
+type RecipientDetail struct {
+	Email         string                 `json:"email"`
+	Role          string                 `json:"role"`
+	PayoutDetails RecipientPayoutDetails `json:"payout_details,omitempty"`
+}
+
+type RecipientPayoutDetails struct {
+	Currency    EscrowCurrencyDetails `json:"currency,omitempty"`
+	Fiat        FiatDetails           `json:"fiat_details,omitempty"`
+	Crypto      Crypto                `json:"crypto_details,omitempty"`
+	IsConfirmed bool                  `json:"is_confirmed"`
+}
+
+type EscrowCurrencyDetails struct {
+	Image        string `json:"image"`
+	Name         string `json:"name"`
+	Symbol       string `json:"symbol"`
+	Abbreviation string `json:"abbreviation"`
+	CurrencyType string `json:"currencyType"`
+}
+
+type FiatDetails struct {
+	BankName      string `json:"bank"`
+	AccountName   string `json:"account_name"`
+	AccountNumber string `json:"account_number"`
+}
+
+type Crypto struct {
+	NetworkName         string `json:"network_name,omitempty"`
+	NetworkAbbreviation string `json:"network_abbreviation,omitempty"`
+	NetworkLogo         string `json:"network_logo,omitempty"`
+	WalletAddress       string `json:"wallet_address,omitempty"`
+}
+
+type RoleDetail struct {
+	Email string `json:"email"`
+	Role  string `json:"role"`
+}
+
+type EscrowTransactions struct {
+	ReferenceID     string                `json:"referenceId"`
+	Amount          float64               `json:"amount"`
+	Title           string                `json:"title"`
+	Message         string                `json:"message"`
+	ChargedAmount   float64               `json:"chargedAmount"`
+	ChargeType      TransactionType       `json:"chargeType"`
+	Type            TransactionType       `json:"type"`
+	Status          TransactionStatus     `json:"status"`
+	Currency        EscrowCurrencyDetails `json:"currency"`
+	CreatedAt       time.Time             `json:"createdAt"`
+	UpdatedAt       time.Time             `json:"updatedAt"`
+	TransactionHash string                `json:"transactionHash"`
+	ApplicationName string                `json:"applicationName"`
+	ReferenceHash   string                `json:"referenceHash"`
+	MetaData        string                `json:"metaData"`
+}
+
+type FundReleaseDetail struct {
+	Id              int64                 `json:"id"`
+	Amount          float64               `json:"amount"`
+	Status          TransactionStatus     `json:"status"`
+	Charges         float64               `json:"charges"`
+	TotalDeductable float64               `json:"total_deductable"`
+	IsReleased      bool                  `json:"is_released"`
+	Approved        bool                  `json:"approved"`
+	Currency        EscrowCurrencyDetails `json:"currency"`
+	CreatedAt       time.Time             `json:"created_at"`
+	UpdatedAt       time.Time             `json:"updated_at"`
+}
+
+type RequestOtp struct {
+	EscrowId string `json:"escrow_id" validate:"required"`
+	Email    string `json:"email" validate:"required,email"`
+}
+
+type AddEscrowRecipient struct {
+	EscrowId          string `json:"escrow_id" validate:"required"`
+	AuthorizationCode string `json:"authorization_code" validate:"omitempty"`
+	Email             string `json:"email" validate:"omitempty,email"`
+}
+
+type RequestFundReleaseRequest struct {
+	EscrowId          string  `json:"escrow_id" validate:"required"`
+	Amount            float64 `json:"amount" validate:"required,gt=0"`
+	RecipientEmail    string  `json:"recipient_email" validate:"required,email"`
+	MetaData          string  `json:"metadata" validate:"omitempty"`
+	Otp               string  `json:"otp" validate:"required"`
+	AuthorizationCode string  `json:"authorization_code" validate:"required"`
+}
+
+type ConfirmFundRelease struct {
+	EscrowId          string `json:"escrow_id" validate:"required"`
+	FundRequestId     int64  `json:"fund_request_id" validate:"required"`
+	Otp               string `json:"otp" validate:"required"`
+	AuthorizationCode string `json:"authorization_code" validate:"required"`
+}
+
+type SystemRelease struct {
+	EscrowId      string `json:"escrow_id" validate:"required"`
+	FundRequestId int64  `json:"fund_request_id" validate:"required"`
+}
+
+type UpdateAuthorizationCodeRequest struct {
+	EscrowId             string `json:"escrow_id" validate:"required"`
+	EscrowUserEmail      string `json:"escrow_user_email" validate:"required"`
+	NewAuthorizationCode string `json:"new_authorization_code" validate:"required"`
+	Otp                  string `json:"otp" validate:"omitempty"`
+	OldAuthorizationCode string `json:"old_authorization_code" validate:"omitempty"`
+}
+
+type AddPayoutDetailsRequest struct {
+	EscrowId                      string `json:"escrow_id" validate:"required"`
+	Email                         string `json:"email" validate:"required,email"`
+	CurrencyAbbreviation          string `json:"currency_abbreviation" validate:"required"`
+	WalletAddress                 string `json:"wallet_address" validate:"omitempty"`
+	BankCode                      string `json:"bank_code" validate:"omitempty"`
+	AccountNumber                 string `json:"account_number" validate:"omitempty"`
+	AccountName                   string `json:"account_name" validate:"omitempty"`
+	SortCode                      string `json:"sort_code" validate:"omitempty"`
+	BlockchainNetworkAbbreviation string `json:"blockchain_network_abbreviation" validate:"omitempty"`
+	Save                          bool   `json:"save" validate:"omitempty"`
+}
+
+type RecipientAccountDetailsResponse struct {
+	Status  string                  `json:"status"`
+	Message string                  `json:"message"`
+	Code    int                     `json:"code"`
+	Data    RecipientAccountDetails `json:"data"`
+}
+
+type RecipientAccountDetails struct {
+	Email     string                `json:"email"`
+	Role      string                `json:"role"`
+	Confirmed bool                  `json:"confirmed"`
+	Currency  EscrowCurrencyDetails `json:"currency"`
+	Fiat      FiatDetails           `json:"account_details,omitempty"`
+	Crypto    Crypto                `json:"crypto_details,omitempty"`
+}
+
+type FundRequestDetails struct {
+	EscrowId       string         `json:"escrow_id"`
+	PaymentLink    string         `json:"payment_link"`
+	PaymentDetails PaymentDetails `json:"payment_details"`
+}
+
+type FundRequestResponse struct {
+	Status  string             `json:"status"`
+	Message string             `json:"message"`
+	Code    int                `json:"code"`
+	Data    FundRequestDetails `json:"data"`
+}
+
+type PaymentDetails struct {
+	ID                   uuid.UUID         `json:"id"`
+	ApplicationName      string            `json:"application_name"`
+	Amount               float64           `json:"amount"`
+	Status               TransactionStatus `json:"status"`
+	CurrencyAbbreviation string            `json:"currency_abbreviation"`
+	CreatedAt            time.Time         `json:"created_at"`
+	Identifier           string            `json:"identifier"`
+	CurrencyDetails      *CurrencyDetails  `json:"currency"`
 }
