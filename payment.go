@@ -120,3 +120,20 @@ func (c *Client) AccountBalance(currencyAbbreviation string) (*PublicBalanceResp
 	}
 	return &balance, nil
 }
+
+func (c *Client) RequestNairaDepositRequest(request *NairaDepositRequest) (*NairaDepositResponse, error) {
+	endpoint := "/merchant-integrations/naira-deposit-request"
+	var depositDetails NairaDepositResponse
+
+	_, err := c.doRequestAndUnmarshal(
+		POST,
+		endpoint,
+		request,
+		&depositDetails,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	return &depositDetails, nil
+}

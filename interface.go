@@ -528,3 +528,25 @@ type PublicMerchantResponse struct {
 	MerchantCode        string `json:"merchantCode"`
 	Avatar              string `json:"avatar"`
 }
+
+type NairaDepositRequest struct {
+	Amount               float64        `json:"amount" validate:"required"`
+	CurrencyAbbreviation string         `json:"currency_abbreviation" validate:"required"`
+	ReferenceId          string         `json:"reference_id" validate:"required"`
+	MetaData             map[string]any `json:"metadata" validate:"required"`
+}
+
+type NairaDepositResponse struct {
+	Message string                   `json:"message"`
+	Code    int                      `json:"code"`
+	Status  string                   `json:"status"`
+	Data    NairaDepositResponseData `json:"data"`
+}
+
+type NairaDepositResponseData struct {
+	AccountNumber        string                  `json:"account_number"`
+	BankName             string                  `json:"bank_name"`
+	AccountName          string                  `json:"account_name"`
+	SocketSubscriptionId string                  `json:"socketSubscriptionId"`
+	Charges              V2PayoutDetailsResponse `json:"charges"`
+}
