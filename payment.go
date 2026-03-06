@@ -137,3 +137,20 @@ func (c *Client) RequestNairaDepositRequest(request *NairaDepositRequest) (*Nair
 	}
 	return &depositDetails, nil
 }
+
+func (c *Client) CreatePaymentLink(request *CreatePaymentLinkRequest) (*PaymentLinkResponse, error) {
+	endpoint := "/merchant-integrations-server/create-payment-link"
+	var res PaymentLinkResponse
+
+	_, err := c.doRequestAndUnmarshal(
+		POST,
+		endpoint,
+		request,
+		&res,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
+}

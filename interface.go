@@ -550,3 +550,18 @@ type NairaDepositResponseData struct {
 	SocketSubscriptionId string                  `json:"socketSubscriptionId"`
 	Charges              V2PayoutDetailsResponse `json:"charges"`
 }
+
+type CreatePaymentLinkRequest struct {
+	CurrencyAbbreviation string     `json:"currency" validate:"required"`
+	Amount               float64    `json:"amount"`
+	ExpiresAt            *time.Time `json:"expires_at" validate:"omitempty"`
+	Title                string     `json:"title" validate:"required"`
+	Description          string     `json:"description"`
+}
+
+type PaymentLinkResponse struct {
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+	Status  string `json:"status"`
+	Data    string `json:"data"`
+}
